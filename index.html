@@ -377,8 +377,10 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
       <div><label for="pAdm">Adm.No</label><input id="pAdm" class="f" type="text" placeholder="e.g. 2022/123"></div>
       <div><label for="pCls">Current Year / Class</label><select id="pCls" class="f"></select></div>
     </div>
-    <label for="pAmt">Default Fee Amount (Rs.)</label>
-    <select id="pAmt" class="f"></select>
+    <div class="two">
+      <div><label for="pAmt">Default Fee Amount (Rs.)</label><select id="pAmt" class="f"></select></div>
+      <div><label for="pPin">Login PIN (Password)</label><input id="pPin" class="f" type="text" inputmode="numeric" maxlength="8" placeholder="Enter new PIN"></div>
+    </div>
     <div class="err" id="pErr" style="margin-top:8px"></div>
     <div style="display:flex;gap:10px;margin-top:14px">
       <button class="btn ghost" style="flex:1" onclick="closeProfileModal()">Cancel</button>
@@ -393,7 +395,7 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
 // ===== PASTE YOUR NEW SUPABASE PROJECT KEYS HERE =====
 const SUPABASE_URL = 'https://tebjfmwyjeuludbviidl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_dYiWPaE1Ao8WbtZafS9ODg_7JFMKmof';
-const PIN = '2246';
+const DEFAULT_PIN = '2246';
 // ===================================================
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -407,7 +409,7 @@ let selectedMonths = [], editingId = null, uploadedPhotoB64 = undefined;
 let formPaymentType = 'monthly';
 let expandedReceiptId = null, promptReceiptId = null, openDotsId = null;
 let pendingDeleteId = null, pendingPermDeleteId = null;
-let ignoringPop = false;
+let trapTimer = null;
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -415,6 +417,11 @@ const fmt = n => Number(n).toLocaleString('en-US', {maximumFractionDigits: 2});
 const fd = iso => iso ? iso.split('-').reverse().join('/') : '';
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const busy = b => $('busy').classList.toggle('hidden', !b);
+
+function getActivePin() {
+  if (S && S.profile && S.profile.pin) return String(S.profile.pin);
+  return localStorage.getItem('ft_custom_pin') || DEFAULT_PIN;
+}
 
 function persistPageState() {
   try {
@@ -439,17 +446,21 @@ function removeFromBinLocal(id) {
   saveBinIds(getBinIds().filter(x => x !== String(id)));
 }
 
-/* TWO-STEP BACK TRAP SO DASHBOARD BACK STOPS AT LOGIN PAGE */
-function armBackTrap() {
+/* RELIABLE BACK TRAP SO DASHBOARD BACK STOPS AT LOGIN SCREEN */
+function pushTrapEntry() {
   try {
-    const base = location.pathname + location.search;
-    history.replaceState({ ftGuard: 'lock' }, '', base + '#login');
-    history.pushState({ ftGuard: 'dash', t: Date.now() }, '', base + '#portal');
+    history.pushState({ ftPortalTrap: true, seq: Date.now() + Math.random() }, '');
   } catch (e) {}
 }
 
-function handleBackAction(ev) {
-  if (ignoringPop) { ignoringPop = false; return; }
+function armBackTrap() {
+  clearTimeout(trapTimer);
+  trapTimer = setTimeout(() => {
+    if (S) pushTrapEntry();
+  }, 40);
+}
+
+function handleBackAction() {
   if (!S) return;
 
   if (!$('ovConfirmDel').classList.contains('hidden')) { closeConfirmDel(); armBackTrap(); return; }
@@ -472,19 +483,19 @@ function handleBackAction(ev) {
     return;
   }
 
-  // Stop right on Login Page without exiting browser
+  // On dashboard -> Back brings user straight to Login Screen and holds there
   lockToLogin(true);
 }
 window.addEventListener('popstate', handleBackAction);
 
-function lockToLogin(fromBack = false) {
+function lockToLogin(stayOnLogin = false) {
+  clearTimeout(trapTimer);
   S = null; expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
   try { sessionStorage.setItem('ft_session_unlocked', '0'); } catch (e) {}
   $('pin').value = ''; $('lockErr').textContent = '';
   $('app').classList.add('hidden'); $('lock').classList.remove('hidden');
-  if (!fromBack) {
-    ignoringPop = true;
-    try { history.replaceState(null, '', location.pathname + location.search + '#login'); } catch (e) {}
+  if (stayOnLogin) {
+    try { history.pushState({ ftLockedScreen: true, seq: Date.now() }, ''); } catch (e) {}
   }
 }
 
@@ -506,6 +517,7 @@ window.addEventListener('DOMContentLoaded', async () => {
       currentYear = (savedYr && YEARS.includes(savedYr)) ? savedYr : (S.profile.cls || '1st year');
       activeTab = (savedTab === 'card') ? 'card' : 'rec';
       viewMode = (savedView === 'bin') ? 'bin' : 'dashboard';
+      pushTrapEntry();
       armBackTrap();
       syncProfileUI();
       setTab(activeTab);
@@ -522,10 +534,15 @@ window.addEventListener('DOMContentLoaded', async () => {
   $('lock').classList.remove('hidden');
   $('app').classList.add('hidden');
   try {
-    const { data } = await sb.from('fee_profile').select('login_photo').eq('id', 1).single();
-    if (data && data.login_photo) {
-      $('loginAvatar').src = data.login_photo;
-      localStorage.setItem('ft_avatar', data.login_photo);
+    const { data } = await sb.from('fee_profile').select('*').eq('id', 1).single();
+    if (data) {
+      if (data.login_photo) {
+        $('loginAvatar').src = data.login_photo;
+        localStorage.setItem('ft_avatar', data.login_photo);
+      }
+      if (data.login_pin) {
+        localStorage.setItem('ft_custom_pin', String(data.login_pin));
+      }
     }
   } catch (e) {}
 });
@@ -546,12 +563,16 @@ async function fetchAllFromSupabase() {
   const { data: profRow } = await sb.from('fee_profile').select('*').eq('id', 1).single();
   const { data: recRows, error } = await sb.from('fee_records').select('*').order('payment_date', { ascending: false });
   if (error) throw error;
+  const savedPin = (profRow && profRow.login_pin) || localStorage.getItem('ft_custom_pin') || DEFAULT_PIN;
+  localStorage.setItem('ft_custom_pin', String(savedPin));
+
   const profile = {
     name: (profRow && profRow.student_name) || '',
     adm: (profRow && profRow.adm_no) || '',
     cls: (profRow && profRow.default_class) || '1st year',
     amount: (profRow && profRow.default_amount) || '8000',
-    photo: (profRow && profRow.login_photo) || ''
+    photo: (profRow && profRow.login_photo) || '',
+    pin: String(savedPin)
   };
   const binIds = getBinIds();
   const allRecords = (recRows || []).map(r => {
@@ -583,7 +604,8 @@ async function fetchAllFromSupabase() {
 async function unlock() {
   const entered = $('pin').value.trim();
   $('lockErr').textContent = '';
-  if (entered !== PIN) return $('lockErr').textContent = 'Incorrect PIN';
+  const expectedPin = getActivePin();
+  if (entered !== expectedPin) return $('lockErr').textContent = 'Incorrect PIN';
   busy(true);
   try {
     S = await fetchAllFromSupabase();
@@ -592,6 +614,7 @@ async function unlock() {
     activeTab = 'rec';
     viewMode = 'dashboard';
     expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
+    pushTrapEntry();
     armBackTrap();
     persistPageState();
     syncProfileUI(); setTab('rec'); renderAll();
@@ -1060,6 +1083,7 @@ async function saveReceipt() {
 function openProfileModal() {
   toggleMenu(false); $('pErr').textContent = ''; uploadedPhotoB64 = undefined; const p = S.profile;
   $('pName').value = p.name || ''; $('pAdm').value = p.adm || ''; $('pCls').value = p.cls || '1st year'; $('pAmt').value = p.amount || '8000';
+  $('pPin').value = getActivePin();
   $('profPreview').src = p.photo || DEFAULT_AVATAR; $('ovProf').classList.remove('hidden');
 }
 function closeProfileModal() { $('ovProf').classList.add('hidden'); }
@@ -1072,13 +1096,24 @@ function handlePhotoUpload(input) {
 }
 
 async function saveProfile() {
-  const name = $('pName').value.trim(), adm = $('pAdm').value.trim();
+  const name = $('pName').value.trim(), adm = $('pAdm').value.trim(), newPin = $('pPin').value.trim();
   if (!name || !adm) return $('pErr').textContent = 'Enter both Name and Adm.No';
-  const upd = { id: 1, student_name: name, adm_no: adm, default_class: $('pCls').value, default_amount: $('pAmt').value };
+  if (!newPin || newPin.length < 4) return $('pErr').textContent = 'Enter a Login PIN (at least 4 digits)';
+
+  localStorage.setItem('ft_custom_pin', newPin);
+
+  const upd = { id: 1, student_name: name, adm_no: adm, default_class: $('pCls').value, default_amount: $('pAmt').value, login_pin: newPin };
   if (uploadedPhotoB64 !== undefined) upd.login_photo = uploadedPhotoB64;
+
   busy(true);
   try {
-    const { error } = await sb.from('fee_profile').upsert(upd);
+    let { error } = await sb.from('fee_profile').upsert(upd);
+    if (error && /login_pin/i.test(error.message || '')) {
+      const fallbackUpd = { ...upd };
+      delete fallbackUpd.login_pin;
+      const res2 = await sb.from('fee_profile').upsert(fallbackUpd);
+      error = res2.error;
+    }
     if (error) throw error;
     await reloadData(); currentYear = S.profile.cls; persistPageState(); renderAll(); closeProfileModal();
   } catch (e) { $('pErr').textContent = e.message || 'Save failed'; }
