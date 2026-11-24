@@ -95,20 +95,21 @@ button,input,select{font:inherit;color:inherit}
 .tab{flex:1;padding:9px;border-radius:11px;border:1.5px solid var(--brand);background:#fff;color:var(--brand);font-weight:700;font-size:.86rem;cursor:pointer}
 .tab.on{background:var(--brand);color:#fff}
 
+/* SINGLE FULL BAR WITH THREE DOTS AT RIGHT EDGE */
 .r-bar-wrap{margin-bottom:9px;position:relative}
-.r-bar-row{display:flex;align-items:stretch;gap:6px}
-.r-bar{flex:1;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--brand);border-radius:12px;
-  padding:11px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;text-align:left;box-shadow:0 3px 10px rgba(13,76,92,.05)}
+.r-bar{width:100%;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--brand);border-radius:12px;
+  padding:11px 8px 11px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px;box-shadow:0 3px 10px rgba(13,76,92,.05)}
 .r-bar.extra-bar{border-left-color:var(--accent)}
+.r-bar-main{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;text-align:left;background:transparent;border:0;padding:0}
 .r-bar .rb-m{font-weight:700;font-size:.94rem;color:var(--ink)}
 .r-bar .rb-s{font-size:.76rem;color:var(--muted);margin-top:2px}
 .r-bar .rb-right{text-align:right;white-space:nowrap}
 .r-bar .rb-amt{font-weight:800;font-size:.92rem;color:var(--brand)}
 .r-bar .rb-act{display:inline-block;margin-top:3px;font-size:.72rem;font-weight:700;color:var(--accent);background:#e3f4ee;padding:2px 8px;border-radius:12px}
 
-.dots-btn{background:var(--card);border:1px solid var(--line);border-radius:12px;width:36px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;font-weight:800;color:var(--muted);cursor:pointer;box-shadow:0 3px 10px rgba(13,76,92,.05);flex-shrink:0}
-.dots-btn:active{background:#eef4f3}
-.dots-menu{position:absolute;right:0;top:calc(100% + 4px);background:#fff;border:1.5px solid var(--line);border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.16);z-index:20;padding:5px;min-width:155px}
+.dots-btn{background:transparent;border:0;border-radius:8px;width:28px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800;color:var(--muted);cursor:pointer;flex-shrink:0;padding:0}
+.dots-btn:active{background:#eef4f3;color:var(--ink)}
+.dots-menu{position:absolute;right:8px;top:calc(100% + 4px);background:#fff;border:1.5px solid var(--line);border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.16);z-index:20;padding:5px;min-width:155px}
 .dots-del-btn{width:100%;background:#fff1ef;color:var(--miss);border:0;border-radius:8px;padding:9px 12px;font-weight:700;font-size:.84rem;text-align:left;cursor:pointer;display:flex;align-items:center;gap:6px}
 .dots-del-btn:active{background:#ffe0dc}
 
@@ -174,7 +175,7 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
 </head>
 <body>
 
-<div id="lock">
+<div id="lock" class="hidden">
   <form class="lockbox" onsubmit="unlock();return false">
     <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
     <h1 class="l-title">FEE TRACKER</h1>
@@ -188,7 +189,7 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
   </form>
 </div>
 
-<div id="app" class="hidden" onclick="closeAllDotsMenus()">
+<div id="app" onclick="closeAllDotsMenus()">
   <div class="topbar">
     <button class="menu-btn" onclick="event.stopPropagation();toggleMenu(true)" aria-label="Menu"><span></span><span></span><span></span></button>
     <div class="top-info">
@@ -389,7 +390,7 @@ const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/20
 
 let S = null, currentYear = '1st year', activeTab = 'rec', viewMode = 'dashboard';
 let selectedMonths = [], editingId = null, uploadedPhotoB64 = undefined;
-let formPaymentType = 'monthly'; // 'monthly' | 'admission' | 'extra'
+let formPaymentType = 'monthly';
 let expandedReceiptId = null, promptReceiptId = null, openDotsId = null;
 let pendingDeleteId = null, pendingPermDeleteId = null;
 
@@ -400,7 +401,16 @@ const fd = iso => iso ? iso.split('-').reverse().join('/') : '';
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const busy = b => $('busy').classList.toggle('hidden', !b);
 
-// Local Bin tracker (works seamlessly even without adding new columns to Supabase)
+/* PERSIST PAGE STATE ON REFRESH */
+function persistPageState() {
+  try {
+    localStorage.setItem('ft_session_unlocked', S ? '1' : '0');
+    localStorage.setItem('ft_current_year', currentYear);
+    localStorage.setItem('ft_active_tab', activeTab);
+    localStorage.setItem('ft_view_mode', viewMode);
+  } catch (e) {}
+}
+
 function getBinIds() {
   try { return JSON.parse(localStorage.getItem('ft_bin_ids') || '[]').map(String); } catch (e) { return []; }
 }
@@ -415,30 +425,26 @@ function removeFromBinLocal(id) {
   saveBinIds(getBinIds().filter(x => x !== String(id)));
 }
 
-function armBackTrap() {
-  try { history.pushState({ ftGuard: true, n: Date.now() }, '', '#portal'); location.hash = '#portal'; } catch (e) {}
-}
 function handleBackAction() {
   if (!S) return;
-  if (!$('ovConfirmDel').classList.contains('hidden')) { closeConfirmDel(); armBackTrap(); return; }
-  if (!$('ovPermDel').classList.contains('hidden')) { closePermDel(); armBackTrap(); return; }
-  if (!$('ovRec').classList.contains('hidden')) { closeReceiptModal(); armBackTrap(); return; }
-  if (!$('ovProf').classList.contains('hidden')) { closeProfileModal(); armBackTrap(); return; }
-  if ($('drawer').classList.contains('open')) { toggleMenu(false); armBackTrap(); return; }
-  if (openDotsId) { openDotsId = null; renderAll(); armBackTrap(); return; }
-  if (viewMode === 'bin') { goDashboard(); armBackTrap(); return; }
-  if (expandedReceiptId) { expandedReceiptId = null; renderAll(); armBackTrap(); return; }
-  if (promptReceiptId) { promptReceiptId = null; renderAll(); armBackTrap(); return; }
-  if (activeTab === 'card') { setTab('rec'); armBackTrap(); return; }
+  if (!$('ovConfirmDel').classList.contains('hidden')) { closeConfirmDel(); return; }
+  if (!$('ovPermDel').classList.contains('hidden')) { closePermDel(); return; }
+  if (!$('ovRec').classList.contains('hidden')) { closeReceiptModal(); return; }
+  if (!$('ovProf').classList.contains('hidden')) { closeProfileModal(); return; }
+  if ($('drawer').classList.contains('open')) { toggleMenu(false); return; }
+  if (openDotsId) { openDotsId = null; renderAll(); return; }
+  if (viewMode === 'bin') { goDashboard(); return; }
+  if (expandedReceiptId) { expandedReceiptId = null; renderAll(); return; }
+  if (promptReceiptId) { promptReceiptId = null; renderAll(); return; }
+  if (activeTab === 'card') { setTab('rec'); return; }
   const defYr = S.profile.cls || '1st year';
-  if (currentYear !== defYr) { currentYear = defYr; renderAll(); armBackTrap(); return; }
-  lockToLogin();
+  if (currentYear !== defYr) { currentYear = defYr; persistPageState(); renderAll(); return; }
 }
 window.addEventListener('popstate', handleBackAction);
-window.addEventListener('hashchange', () => { if (S && location.hash !== '#portal') handleBackAction(); });
 
 function lockToLogin() {
   S = null; expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
+  localStorage.setItem('ft_session_unlocked', '0');
   $('pin').value = ''; $('lockErr').textContent = '';
   $('app').classList.add('hidden'); $('lock').classList.remove('hidden');
 }
@@ -447,6 +453,35 @@ window.addEventListener('DOMContentLoaded', async () => {
   initDropdowns();
   const cachedPhoto = localStorage.getItem('ft_avatar');
   if (cachedPhoto) $('loginAvatar').src = cachedPhoto;
+
+  // Restore session automatically on page refresh
+  const wasUnlocked = localStorage.getItem('ft_session_unlocked') === '1';
+  if (wasUnlocked) {
+    $('lock').classList.add('hidden');
+    $('app').classList.remove('hidden');
+    busy(true);
+    try {
+      S = await fetchAllFromSupabase();
+      const savedYr = localStorage.getItem('ft_current_year');
+      const savedTab = localStorage.getItem('ft_active_tab');
+      const savedView = localStorage.getItem('ft_view_mode');
+      currentYear = (savedYr && YEARS.includes(savedYr)) ? savedYr : (S.profile.cls || '1st year');
+      activeTab = (savedTab === 'card') ? 'card' : 'rec';
+      viewMode = (savedView === 'bin') ? 'bin' : 'dashboard';
+      syncProfileUI();
+      setTab(activeTab);
+      renderAll();
+    } catch (e) {
+      $('app').classList.add('hidden');
+      $('lock').classList.remove('hidden');
+      $('lockErr').textContent = e.message || 'Connection error';
+    }
+    busy(false);
+    return;
+  }
+
+  $('lock').classList.remove('hidden');
+  $('app').classList.add('hidden');
   try {
     const { data } = await sb.from('fee_profile').select('login_photo').eq('id', 1).single();
     if (data && data.login_photo) {
@@ -515,9 +550,11 @@ async function unlock() {
     S = await fetchAllFromSupabase();
     $('lock').classList.add('hidden'); $('app').classList.remove('hidden');
     currentYear = S.profile.cls || '1st year';
+    activeTab = 'rec';
     viewMode = 'dashboard';
     expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
-    armBackTrap(); syncProfileUI(); renderAll();
+    persistPageState();
+    syncProfileUI(); setTab('rec'); renderAll();
     if (!S.profile.name || !S.profile.adm) openProfileModal();
   } catch (e) { $('lockErr').textContent = e.message || 'Connection error'; }
   busy(false);
@@ -543,21 +580,31 @@ function goDashboard() {
   viewMode = 'dashboard';
   currentYear = S.profile.cls || '1st year';
   expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
+  persistPageState();
   toggleMenu(false); renderAll();
 }
 function selectYear(yr) {
   viewMode = 'dashboard';
   currentYear = yr;
   expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
+  persistPageState();
   toggleMenu(false); renderAll();
 }
 function openBinView() {
   viewMode = 'bin';
   expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
+  persistPageState();
   toggleMenu(false); renderAll();
 }
 
-function setTab(t) { activeTab = t; $('tabRec').classList.toggle('on', t==='rec'); $('tabCard').classList.toggle('on', t==='card'); $('vRec').classList.toggle('hidden', t!=='rec'); $('vCard').classList.toggle('hidden', t!=='card'); }
+function setTab(t) {
+  activeTab = t;
+  persistPageState();
+  $('tabRec').classList.toggle('on', t==='rec');
+  $('tabCard').classList.toggle('on', t==='card');
+  $('vRec').classList.toggle('hidden', t!=='rec');
+  $('vCard').classList.toggle('hidden', t!=='card');
+}
 function getActiveRecords() { return S.allRecords.filter(r => !r.isDeleted); }
 function getDeletedRecords() { return S.allRecords.filter(r => r.isDeleted); }
 function getYearRecords() { return getActiveRecords().filter(r => (r.acadYear || r.cls) === currentYear); }
@@ -644,8 +691,8 @@ function renderReceiptsList(yrRecs) {
 
     if (!isExpanded) {
       return `<div class="r-bar-wrap">
-        <div class="r-bar-row">
-          <button type="button" class="r-bar ${r.isExtra ? 'extra-bar' : ''}" onclick="onBarTap('${r.id}')">
+        <div class="r-bar ${r.isExtra ? 'extra-bar' : ''}">
+          <button type="button" class="r-bar-main" onclick="onBarTap('${r.id}')">
             <div>
               <div class="rb-m">${esc(mText)}</div>
               <div class="rb-s">No. ${esc(r.no)} • ${fd(r.date)}</div>
@@ -838,7 +885,7 @@ function shareReceiptImg(id) { const r = S.allRecords.find(x => String(x.id) ===
 function downloadCardImg() { triggerDownload(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.jpg`); }
 function shareCardImg() { triggerShare(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.jpg`, `Hostel Fee Card - ${currentYear}`); }
 
-/* RECEIPT MODAL LOGIC (MONTHLY / ADMISSION / EXTRA) */
+/* RECEIPT MODAL LOGIC */
 function openReceiptModal(id, typeOverride) {
   $('fErr').textContent = '';
   $('monthPickerGrid').classList.add('hidden');
@@ -890,7 +937,6 @@ function applyFormModeUI() {
   $('admLabelSection').classList.toggle('hidden', !isAdm);
   $('extraSection').classList.toggle('hidden', !isExtra);
 
-  // Manual amount typing for Admission & Extra; dropdown for Monthly
   $('fAmtSelect').classList.toggle('hidden', !isMonthly);
   $('fAmtManual').classList.toggle('hidden', isMonthly);
   if (!isMonthly && !$('fAmtManual').value) {
@@ -968,6 +1014,7 @@ async function saveReceipt() {
       : await sb.from('fee_records').insert(payload);
     if (error) throw error;
     currentYear = effectiveAcadYear; expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
+    persistPageState();
     await reloadData(); closeReceiptModal(); setTab('rec');
   } catch (e) { E(e.message || 'Save failed'); }
   busy(false);
@@ -996,7 +1043,7 @@ async function saveProfile() {
   try {
     const { error } = await sb.from('fee_profile').upsert(upd);
     if (error) throw error;
-    await reloadData(); currentYear = S.profile.cls; renderAll(); closeProfileModal();
+    await reloadData(); currentYear = S.profile.cls; persistPageState(); renderAll(); closeProfileModal();
   } catch (e) { $('pErr').textContent = e.message || 'Save failed'; }
   busy(false);
 }
