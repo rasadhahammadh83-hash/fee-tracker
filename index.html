@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Fee Tracker - Jamiah Naleemiah</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#f2f6f5;--card:#ffffff;--ink:#132625;--muted:#5b706e;
+  --brand:#0d4c5c;--brand-light:#e2f0f3;--accent:#197b62;--miss:#b83b2b;--line:#d5e0de;
+  --shadow:0 8px 24px rgba(13,76,92,.08);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;min-height:100vh;color:var(--ink);font-family:'Plus Jakarta Sans',system-ui,sans-serif;line-height:1.45;background:var(--bg);overflow-x:hidden}
+button,input,select{font:inherit;color:inherit}
+.hidden{display:none!important}
+
+/* GLASSMORPHISM LOGIN SCREEN ONLY */
+#lock{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:url('https://i.ibb.co/hJgjZvxW/file-000000004c8482118559fcfa4102544e.png') center/cover no-repeat fixed;
+}
+.lockbox{
+  background:rgba(255,255,255,.32);
+  backdrop-filter:blur(12px) saturate(140%);
+  -webkit-backdrop-filter:blur(12px) saturate(140%);
+  border:1.5px solid rgba(255,255,255,.65);
+  box-shadow:0 22px 50px rgba(0,0,0,.32), inset 0 1px 1px rgba(255,255,255,.7);
+  border-radius:26px;padding:28px 22px;width:100%;max-width:360px;text-align:center;
+}
+.bismillah{font-family:'Amiri',serif;font-size:1.55rem;color:#ffffff;text-shadow:0 2px 10px rgba(0,0,0,.45);margin-bottom:4px;line-height:1.6}
+.l-title{font-size:1.35rem;font-weight:800;letter-spacing:.8px;color:#ffffff;text-shadow:0 2px 10px rgba(0,0,0,.45);margin:0}
+.l-sub{font-size:.82rem;font-weight:700;letter-spacing:1.4px;color:#e7fbf5;text-shadow:0 1px 8px rgba(0,0,0,.45);margin:2px 0 16px}
+.avatar-wrap{width:96px;height:96px;border-radius:50%;margin:0 auto 16px;padding:3px;background:rgba(255,255,255,.75);box-shadow:0 8px 22px rgba(0,0,0,.25)}
+.avatar-img{width:100%;height:100%;border-radius:50%;object-fit:cover;background:rgba(255,255,255,.8);display:block}
+.lockbox input{
+  width:100%;font-size:1.6rem;text-align:center;letter-spacing:.5em;padding:12px;
+  border:1.5px solid rgba(255,255,255,.75);border-radius:14px;margin:10px 0 6px;
+  background:rgba(255,255,255,.78);color:#132625;outline:none;backdrop-filter:blur(6px)
+}
+.lockbox input:focus{background:rgba(255,255,255,.92);border-color:#fff}
+.lockbox .btn{background:rgba(13,76,92,.9);border:1px solid rgba(255,255,255,.45);backdrop-filter:blur(6px)}
+.err{color:#ffe2dc;background:rgba(155,35,25,.65);border-radius:8px;font-size:.84rem;min-height:1.3em;font-weight:700;word-break:break-word;padding:2px 6px}
+.err:empty{display:none}
+#app .err,#ovRec .err,#ovProf .err{color:var(--miss);background:transparent;padding:2px 0}
+
+#app{min-height:100vh;background:var(--bg)}
+
+.btn{background:var(--brand);color:#fff;border:0;border-radius:11px;padding:11px 14px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:.15s}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:#fff;color:var(--brand);border:1.5px solid var(--brand)}
+.btn.soft{background:var(--brand-light);color:var(--brand);border:1px solid rgba(13,76,92,.18)}
+.btn.danger{background:var(--miss)}
+.btn.sm{padding:8px 12px;font-size:.84rem;border-radius:10px}
+
+.topbar{position:sticky;top:0;z-index:15;background:#ffffff;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line)}
+.menu-btn{background:#f7faf9;border:1px solid var(--line);border-radius:11px;width:40px;height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer}
+.menu-btn span{width:19px;height:2.2px;background:var(--brand);border-radius:2px;display:block}
+.top-info{text-align:right}
+.top-info .t-main{font-weight:800;font-size:1rem;color:var(--brand)}
+.top-info .t-yr{font-size:.75rem;font-weight:700;color:var(--accent);background:var(--brand-light);padding:2px 8px;border-radius:20px;display:inline-block}
+
+.drawer-ov{position:fixed;inset:0;background:rgba(10,25,25,.45);z-index:30;opacity:0;pointer-events:none;transition:.25s}
+.drawer-ov.open{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;bottom:0;left:0;width:55%;max-width:270px;min-width:215px;background:#fff;z-index:35;
+  transform:translateX(-100%);transition:transform .28s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;box-shadow:10px 0 35px rgba(0,0,0,.18);border-radius:0 22px 22px 0;overflow-y:auto}
+.drawer.open{transform:translateX(0)}
+.d-head{padding:18px 14px 12px;background:linear-gradient(135deg,var(--brand),#16697a);color:#fff}
+.d-head .d-name{font-weight:700;font-size:.94rem;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.d-head .d-adm{font-size:.76rem;opacity:.85}
+.d-nav{padding:10px;flex:1}
+.nav-item{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:0;background:transparent;border-radius:11px;font-weight:600;font-size:.9rem;color:var(--ink);cursor:pointer;text-align:left;margin-bottom:4px}
+.nav-item.active{background:var(--brand-light);color:var(--brand);font-weight:700}
+.nav-group-btn{justify-content:space-between}
+.yr-sub{padding-left:12px;margin:2px 0 8px;border-left:2px solid var(--line);margin-left:16px}
+.yr-item{width:100%;text-align:left;background:transparent;border:0;padding:8px 10px;border-radius:9px;font-size:.85rem;font-weight:600;color:var(--muted);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.yr-item.active{background:var(--brand);color:#fff}
+
+.wrap{max-width:560px;margin:0 auto;padding:12px 12px 100px}
+
+.sum-card{background:linear-gradient(135deg,var(--brand) 0%,#14687a 100%);color:#fff;border-radius:18px;padding:18px;box-shadow:0 10px 24px rgba(13,76,92,.2);cursor:pointer;position:relative}
+.sum-card::after{content:"Tap for details ▾";position:absolute;right:14px;bottom:12px;font-size:.72rem;background:rgba(255,255,255,.16);padding:3px 9px;border-radius:20px}
+.sum-lbl{font-size:.82rem;opacity:.88;font-weight:600}
+.sum-val{font-size:1.85rem;font-weight:800;margin:3px 0 4px;letter-spacing:-.4px}
+.sum-yr{font-size:.8rem;opacity:.9}
+
+.breakdown{background:var(--card);border-radius:14px;padding:12px;margin-top:8px;border:1px solid var(--line);box-shadow:var(--shadow)}
+.bd-row{display:flex;justify-content:space-between;align-items:center;padding:8px 4px;border-bottom:1px dashed var(--line);font-size:.88rem}
+.bd-row:last-child{border-bottom:0}
+
+.tabs{display:flex;gap:8px;margin:14px 0 10px}
+.tab{flex:1;padding:9px;border-radius:11px;border:1.5px solid var(--brand);background:#fff;color:var(--brand);font-weight:700;font-size:.86rem;cursor:pointer}
+.tab.on{background:var(--brand);color:#fff}
+
+.r-bar-wrap{margin-bottom:9px}
+.r-bar{width:100%;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--brand);border-radius:12px;
+  padding:11px 13px;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;text-align:left;box-shadow:0 3px 10px rgba(13,76,92,.05)}
+.r-bar .rb-m{font-weight:700;font-size:.94rem;color:var(--ink)}
+.r-bar .rb-s{font-size:.76rem;color:var(--muted);margin-top:2px}
+.r-bar .rb-right{text-align:right;white-space:nowrap}
+.r-bar .rb-amt{font-weight:800;font-size:.92rem;color:var(--brand)}
+.r-bar .rb-act{display:inline-block;margin-top:3px;font-size:.72rem;font-weight:700;color:var(--accent);background:#e3f4ee;padding:2px 8px;border-radius:12px}
+
+.rc{background:#fff;border:1.5px solid #333;box-shadow:0 8px 22px rgba(0,0,0,.09);border-radius:8px;padding:16px 13px 14px;margin-top:6px;margin-bottom:14px;font-family:'Times New Roman',Georgia,serif;color:#222}
+.rc .t1{text-align:center;font-size:1.28rem;font-weight:700;letter-spacing:.3px}
+.rc .t2{text-align:center;font-size:.9rem;font-weight:700}
+.rc .pill{text-align:center;margin:7px 0 6px}
+.rc .pill span{background:#3a3232;color:#fff;font-style:italic;font-weight:700;border-radius:16px;padding:3px 20px;display:inline-block;font-size:.88rem}
+.rr{display:flex;align-items:flex-end;gap:5px;margin-top:10px;font-size:.88rem}
+.rr span:first-child,.rr span:nth-child(3),.rr span:last-child{white-space:nowrap}
+.rr .v{flex:1;min-width:0;border-bottom:1px dotted #222;font-style:italic;font-size:.9rem;padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rbtn{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:13px;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+.rbtn .btn{padding:8px 4px;font-size:.76rem;border-radius:9px}
+
+.card{background:#f8e3b8;border:3px double #111;padding:14px 11px 16px;font-family:'Times New Roman',Georgia,serif;color:#111;margin-top:6px;box-shadow:0 10px 26px rgba(0,0,0,.14);border-radius:4px}
+.card .yr{text-align:right;font-weight:700;font-size:.98rem}
+.card .t1{text-align:center;font-size:1.38rem;font-weight:700;letter-spacing:.4px}
+.card .t2{text-align:center;font-size:1.08rem;font-weight:700;margin-bottom:8px}
+.card .ln{font-weight:700;font-size:.9rem;margin:5px 0}
+.card .ln span{border-bottom:1px dotted #111;padding:0 6px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);border-top:2px solid #111;border-left:2px solid #111;margin-top:10px}
+.cell{border-right:2px solid #111;border-bottom:2px solid #111;min-height:80px;padding:4px 2px;text-align:center}
+.cell b{display:block;font-size:.9rem}
+.cell .no{font-weight:700;font-size:.84rem;margin-top:5px;word-break:break-all}
+.cell .dt{font-size:.68rem;margin-top:2px}
+.card .dean{font-style:italic;font-weight:700;margin-top:24px;font-size:.88rem}
+
+.fab{position:fixed;right:16px;bottom:18px;box-shadow:0 8px 24px rgba(13,76,92,.35);padding:14px 20px;border-radius:30px;font-size:.92rem;z-index:12}
+.ov{position:fixed;inset:0;background:rgba(10,25,25,.55);display:flex;align-items:flex-end;justify-content:center;z-index:40}
+.sheet{background:#fff;width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:24px 24px 0 0;padding:20px 18px 28px;animation:up .2s ease-out}
+@keyframes up{from{transform:translateY(36px);opacity:.7}to{transform:translateY(0);opacity:1}}
+label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var(--ink)}
+.f{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:11px;background:#fff;outline:none;font-size:.92rem}
+.f:focus{border-color:var(--brand)}
+.f[readonly]{background:#f3f7f6;color:#3d5250}
+.two{display:flex;gap:10px}.two>div{flex:1}
+
+.adm-toggle{display:flex;align-items:center;justify-content:space-between;background:#eef7f5;border:1.5px solid var(--accent);border-radius:12px;padding:10px 12px;margin-top:10px}
+.adm-toggle label{margin:0;color:var(--brand);font-size:.88rem;cursor:pointer;display:flex;align-items:center;gap:8px;flex:1}
+.adm-toggle input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent);cursor:pointer}
+.adm-badge{background:#e3f4ee;color:var(--accent);font-weight:700;padding:8px 12px;border-radius:11px;border:1px solid var(--accent);font-size:.88rem}
+
+.month-box{border:1.5px solid var(--line);border-radius:11px;padding:9px;background:#fafcfb;min-height:48px;display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+.m-chip{background:var(--brand);color:#fff;padding:5px 10px;border-radius:20px;font-size:.82rem;font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.m-chip button{background:rgba(255,255,255,.25);border:0;color:#fff;border-radius:50%;width:17px;height:17px;font-size:.75rem;line-height:1;cursor:pointer;padding:0}
+.plus-btn{width:32px;height:32px;border-radius:50%;border:2px dashed var(--brand);background:var(--brand-light);color:var(--brand);font-size:1.25rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.month-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px;background:#fff;padding:9px;border-radius:11px;border:1.5px solid var(--brand);box-shadow:0 8px 20px rgba(0,0,0,.1)}
+.mg-btn{padding:8px 4px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:.82rem;font-weight:600;cursor:pointer}
+.mg-btn.sel{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+.empty{background:var(--card);border-radius:14px;padding:22px 16px;text-align:center;color:var(--muted);font-size:.9rem;border:1px dashed var(--line)}
+#busy{position:fixed;inset:0;background:rgba(255,255,255,.8);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:60;font-weight:700;color:var(--brand);font-size:1rem}
+</style>
+</head>
+<body>
+
+<div id="lock">
+  <form class="lockbox" onsubmit="unlock();return false">
+    <div class="bismillah">بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ</div>
+    <h1 class="l-title">FEE TRACKER</h1>
+    <div class="l-sub">JAMIAH NALEEMIAH</div>
+    <div class="avatar-wrap">
+      <img id="loginAvatar" class="avatar-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e2f0f3'/><circle cx='50' cy='38' r='18' fill='%230d4c5c'/><path d='M20 88c0-17 13-28 30-28s30 11 30 28' fill='%230d4c5c'/></svg>" alt="Profile">
+    </div>
+    <input id="pin" type="password" inputmode="numeric" maxlength="8" placeholder="••••" autocomplete="off" aria-label="PIN">
+    <div class="err" id="lockErr"></div>
+    <button class="btn" style="width:100%;margin-top:6px" type="submit">Unlock Portal</button>
+  </form>
+</div>
+
+<div id="app" class="hidden">
+  <div class="topbar">
+    <button class="menu-btn" onclick="toggleMenu(true)" aria-label="Menu"><span></span><span></span><span></span></button>
+    <div class="top-info">
+      <div class="t-main">FEE TRACKER</div>
+      <div class="t-yr" id="activeYearBadge">1st year</div>
+    </div>
+  </div>
+
+  <div id="drawerOv" class="drawer-ov" onclick="toggleMenu(false)"></div>
+  <aside id="drawer" class="drawer">
+    <div class="d-head">
+      <img id="menuAvatar" style="width:50px;height:50px;border-radius:50%;object-fit:cover;border:2px solid #fff;background:#fff" src="" alt="">
+      <div class="d-name" id="menuName">Student</div>
+      <div class="d-adm" id="menuAdm">Adm. No: -</div>
+    </div>
+    <div class="d-nav">
+      <button class="nav-item active" id="navDash" onclick="goDashboard()">Dashboard</button>
+      <button class="nav-item nav-group-btn" onclick="toggleYearsList()"><span>Years</span><span id="yrArrow">▾</span></button>
+      <div id="yrSubList" class="yr-sub"></div>
+      <button class="nav-item" onclick="openProfileModal()">Edit Profile</button>
+    </div>
+  </aside>
+
+  <div class="wrap">
+    <div class="sum-card" onclick="toggleBreakdown()">
+      <div class="sum-lbl">Total Paid (LKR)</div>
+      <div class="sum-val" id="sTotal">LKR 0</div>
+      <div class="sum-yr" id="sYearLabel">Year: 1st year</div>
+    </div>
+    <div id="breakdownBox" class="breakdown hidden"></div>
+
+    <div class="tabs">
+      <button class="tab on" id="tabRec" onclick="setTab('rec')">Receipts</button>
+      <button class="tab" id="tabCard" onclick="setTab('card')">Hostel Fee Card</button>
+    </div>
+
+    <div id="vRec"><div id="recList"></div></div>
+
+    <div id="vCard" class="hidden">
+      <div id="cardBox"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn" style="flex:1" onclick="downloadCardImg()">Download Image</button>
+        <button class="btn ghost" style="flex:1" onclick="shareCardImg()">Share</button>
+      </div>
+    </div>
+
+    <button class="btn fab" onclick="openReceiptModal()">+ New Payment</button>
+  </div>
+</div>
+
+<div id="ovRec" class="ov hidden" onclick="if(event.target===this)closeReceiptModal()">
+  <div class="sheet">
+    <h2 id="fTitle" style="margin:0 0 8px;color:var(--brand)">Create Receipt</h2>
+    <div class="two">
+      <div><label for="fNo">No.</label><input id="fNo" class="f" type="text" inputmode="numeric" placeholder="Receipt No."></div>
+      <div><label for="fDate">Date (Tap to change)</label><input id="fDate" class="f" type="date"></div>
+    </div>
+    <div class="two">
+      <div><label for="fAdm">Adm.No</label><input id="fAdm" class="f" type="text" readonly></div>
+      <div><label for="fCls">Class (On Receipt)</label><select id="fCls" class="f" onchange="onClassChange()"></select></div>
+    </div>
+    <label for="fCardYear">Fee Card Year (Select None to exclude from Fee Card)</label>
+    <select id="fCardYear" class="f"></select>
+
+    <div id="admFeeRow" class="adm-toggle hidden">
+      <label for="fIsAdmFee"><input type="checkbox" id="fIsAdmFee" onchange="toggleAdmissionFeeMode()"><span><b>Admission Fee</b> (1st year only)</span></label>
+    </div>
+
+    <label for="fFrom">Received with thanks from</label>
+    <input id="fFrom" class="f" type="text" readonly>
+
+    <div id="monthSection">
+      <label>for the month / months <span style="color:var(--accent);font-weight:600">(Tap + to select)</span></label>
+      <div class="month-box" id="selectedMonthsBox"></div>
+      <div id="monthPickerGrid" class="month-grid hidden"></div>
+    </div>
+
+    <div id="admLabelSection" class="hidden">
+      <label>for the month / months</label>
+      <div class="adm-badge">Admission Fee</div>
+    </div>
+
+    <div class="two">
+      <div>
+        <label for="fAmtSelect">Rs. (Amount)</label>
+        <select id="fAmtSelect" class="f" onchange="updateWordsPreview()"></select>
+        <input id="fAmtManual" class="f hidden" type="number" inputmode="numeric" min="1" step="1" placeholder="Type amount manually" oninput="updateWordsPreview()">
+      </div>
+      <div>
+        <label>a sum of Rupees (Auto)</label>
+        <input id="fWordsPreview" class="f" type="text" readonly>
+      </div>
+    </div>
+
+    <div class="err" id="fErr" style="margin-top:10px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn ghost" style="flex:1" onclick="closeReceiptModal()">Cancel</button>
+      <button class="btn" style="flex:2" onclick="saveReceipt()">Create Receipt</button>
+    </div>
+    <div id="fDelRow" class="hidden" style="margin-top:10px">
+      <button class="btn danger" style="width:100%" id="fDel" onclick="deleteRec()">Delete Receipt</button>
+    </div>
+  </div>
+</div>
+
+<div id="ovProf" class="ov hidden" onclick="if(event.target===this)closeProfileModal()">
+  <div class="sheet">
+    <h2 style="margin:0 0 8px;color:var(--brand)">Edit Profile</h2>
+    <div style="text-align:center;margin:10px 0">
+      <div class="avatar-wrap" style="width:84px;height:84px;margin-bottom:8px">
+        <img id="profPreview" class="avatar-img" src="" alt="Preview">
+      </div>
+      <label class="btn sm ghost" style="display:inline-flex;cursor:pointer;margin:0">
+        Change Login Photo <input type="file" accept="image/*" class="hidden" onchange="handlePhotoUpload(this)">
+      </label>
+    </div>
+    <label for="pName">Student Full Name (For Receipt)</label>
+    <input id="pName" class="f" type="text" placeholder="Enter your full name">
+    <div class="two">
+      <div><label for="pAdm">Adm.No</label><input id="pAdm" class="f" type="text" placeholder="e.g. 2022/123"></div>
+      <div><label for="pCls">Current Year / Class</label><select id="pCls" class="f"></select></div>
+    </div>
+    <label for="pAmt">Default Fee Amount (Rs.)</label>
+    <select id="pAmt" class="f"></select>
+    <div class="err" id="pErr" style="margin-top:8px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn ghost" style="flex:1" onclick="closeProfileModal()">Cancel</button>
+      <button class="btn" style="flex:2" onclick="saveProfile()">Save Profile</button>
+    </div>
+  </div>
+</div>
+
+<div id="busy" class="hidden">Processing...</div>
+
+<script>
+// ===== PASTE YOUR NEW SUPABASE PROJECT KEYS HERE =====
+const SUPABASE_URL = 'https://tebjfmwyjeuludbviidl.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_dYiWPaE1Ao8WbtZafS9ODg_7JFMKmof';
+const PIN = '2246';
+// ===================================================
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const M3 = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+const YEARS = ['1st year','2nd year','3rd year','4th year','5th year','6th year','7th year'];
+const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e2f0f3'/><circle cx='50' cy='38' r='18' fill='%230d4c5c'/><path d='M20 88c0-17 13-28 30-28s30 11 30 28' fill='%230d4c5c'/></svg>";
+
+let S = null, currentYear = '1st year', activeTab = 'rec';
+let selectedMonths = [], editingId = null, uploadedPhotoB64 = undefined, delArmed = false;
+let expandedReceiptId = null, promptReceiptId = null;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt = n => Number(n).toLocaleString('en-US', {maximumFractionDigits: 2});
+const fd = iso => iso ? iso.split('-').reverse().join('/') : '';
+const todayStr = () => new Date().toISOString().slice(0, 10);
+const busy = b => $('busy').classList.toggle('hidden', !b);
+
+function armBackTrap() {
+  try { history.pushState({ ftGuard: true, n: Date.now() }, '', '#portal'); location.hash = '#portal'; } catch (e) {}
+}
+function handleBackAction() {
+  if (!S) return;
+  if (!$('ovRec').classList.contains('hidden')) { closeReceiptModal(); armBackTrap(); return; }
+  if (!$('ovProf').classList.contains('hidden')) { closeProfileModal(); armBackTrap(); return; }
+  if ($('drawer').classList.contains('open')) { toggleMenu(false); armBackTrap(); return; }
+  if (expandedReceiptId) { expandedReceiptId = null; renderAll(); armBackTrap(); return; }
+  if (promptReceiptId) { promptReceiptId = null; renderAll(); armBackTrap(); return; }
+  if (activeTab === 'card') { setTab('rec'); armBackTrap(); return; }
+  const defYr = S.profile.cls || '1st year';
+  if (currentYear !== defYr) { currentYear = defYr; renderAll(); armBackTrap(); return; }
+  lockToLogin();
+}
+window.addEventListener('popstate', handleBackAction);
+window.addEventListener('hashchange', () => { if (S && location.hash !== '#portal') handleBackAction(); });
+
+function lockToLogin() {
+  S = null; expandedReceiptId = null; promptReceiptId = null;
+  $('pin').value = ''; $('lockErr').textContent = '';
+  $('app').classList.add('hidden'); $('lock').classList.remove('hidden');
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  initDropdowns();
+  const cachedPhoto = localStorage.getItem('ft_avatar');
+  if (cachedPhoto) $('loginAvatar').src = cachedPhoto;
+  try {
+    const { data } = await sb.from('fee_profile').select('login_photo').eq('id', 1).single();
+    if (data && data.login_photo) {
+      $('loginAvatar').src = data.login_photo;
+      localStorage.setItem('ft_avatar', data.login_photo);
+    }
+  } catch (e) {}
+});
+
+function initDropdowns() {
+  let amtOpts = '';
+  for (let v = 5000; v <= 30000; v += 500) amtOpts += `<option value="${v}">Rs. ${fmt(v)}</option>`;
+  $('fAmtSelect').innerHTML = amtOpts; $('pAmt').innerHTML = amtOpts;
+  const yrOpts = YEARS.map(y => `<option value="${y}">${y}</option>`).join('');
+  $('pCls').innerHTML = yrOpts; $('fCls').innerHTML = yrOpts;
+  $('fCardYear').innerHTML = `<option value="None">None (Not on Fee Card)</option>` + yrOpts;
+  $('yrSubList').innerHTML = YEARS.map(y =>
+    `<button class="yr-item" id="yrBtn_${y.replace(/\s/g,'')}" onclick="selectYear('${y}')"><span>${y}</span><span>›</span></button>`
+  ).join('');
+}
+
+async function fetchAllFromSupabase() {
+  const { data: profRow } = await sb.from('fee_profile').select('*').eq('id', 1).single();
+  const { data: recRows, error } = await sb.from('fee_records').select('*').order('payment_date', { ascending: false });
+  if (error) throw error;
+  const profile = {
+    name: (profRow && profRow.student_name) || '',
+    adm: (profRow && profRow.adm_no) || '',
+    cls: (profRow && profRow.default_class) || '1st year',
+    amount: (profRow && profRow.default_amount) || '8000',
+    photo: (profRow && profRow.login_photo) || ''
+  };
+  const records = (recRows || []).map(r => {
+    const mArr = r.months_list ? String(r.months_list).split(',').filter(Boolean) : [r.fee_month];
+    return {
+      id: r.id,
+      acadYear: r.acad_year || r.class_name || '1st year',
+      month: r.fee_month,
+      months: mArr,
+      isAdmissionFee: Boolean(r.is_admission) || mArr.includes('ADMISSION'),
+      date: r.payment_date,
+      amount: Number(r.amount) || 0,
+      no: r.receipt_no,
+      adm: r.adm_no,
+      cls: r.class_name,
+      from: r.received_from,
+      words: r.amount_words
+    };
+  });
+  return { profile, today: todayStr(), records };
+}
+
+async function unlock() {
+  const entered = $('pin').value.trim();
+  $('lockErr').textContent = '';
+  if (entered !== PIN) return $('lockErr').textContent = 'Incorrect PIN';
+  busy(true);
+  try {
+    S = await fetchAllFromSupabase();
+    $('lock').classList.add('hidden'); $('app').classList.remove('hidden');
+    currentYear = S.profile.cls || '1st year';
+    expandedReceiptId = null; promptReceiptId = null;
+    armBackTrap(); syncProfileUI(); renderAll();
+    if (!S.profile.name || !S.profile.adm) openProfileModal();
+  } catch (e) { $('lockErr').textContent = e.message || 'Connection error'; }
+  busy(false);
+}
+
+async function reloadData() {
+  S = await fetchAllFromSupabase();
+  syncProfileUI(); renderAll();
+}
+
+function syncProfileUI() {
+  const p = S.profile, photo = p.photo || DEFAULT_AVATAR;
+  $('loginAvatar').src = photo; $('menuAvatar').src = photo; $('profPreview').src = photo;
+  if (p.photo) localStorage.setItem('ft_avatar', p.photo);
+  $('menuName').textContent = p.name || 'Student Name';
+  $('menuAdm').textContent = 'Adm. No: ' + (p.adm || 'Not set');
+}
+
+function toggleMenu(open) { $('drawer').classList.toggle('open', open); $('drawerOv').classList.toggle('open', open); }
+function toggleYearsList() { const el = $('yrSubList'); const h = el.classList.toggle('hidden'); $('yrArrow').textContent = h ? '▸' : '▾'; }
+function goDashboard() { currentYear = S.profile.cls || '1st year'; expandedReceiptId = null; promptReceiptId = null; toggleMenu(false); renderAll(); }
+function selectYear(yr) { currentYear = yr; expandedReceiptId = null; promptReceiptId = null; toggleMenu(false); renderAll(); }
+function setTab(t) { activeTab = t; $('tabRec').classList.toggle('on', t==='rec'); $('tabCard').classList.toggle('on', t==='card'); $('vRec').classList.toggle('hidden', t!=='rec'); $('vCard').classList.toggle('hidden', t!=='card'); }
+function getYearRecords() { return S.records.filter(r => (r.acadYear || r.cls) === currentYear); }
+
+function formatMonthsLabel(r) {
+  if (r && r.isAdmissionFee) return 'Admission Fee';
+  const arr = Array.isArray(r) ? r : (r.months || []);
+  if (!arr.length) return '';
+  if (arr.length === 1 && arr[0] === 'ADMISSION') return 'Admission Fee';
+  const filtered = arr.filter(x => x !== 'ADMISSION');
+  const years = [...new Set(filtered.map(m => m.slice(0, 4)))];
+  const names = filtered.map(m => MON[Number(m.slice(5, 7)) - 1]);
+  const mp = years.length === 1 ? names.join(', ') + ' ' + years[0] : filtered.map(m => MON[Number(m.slice(5, 7)) - 1] + ' ' + m.slice(0, 4)).join(', ');
+  return arr.includes('ADMISSION') ? ('Admission Fee' + (mp ? ', ' + mp : '')) : mp;
+}
+
+function renderAll() {
+  $('activeYearBadge').textContent = currentYear;
+  $('sYearLabel').textContent = 'Year: ' + currentYear;
+  YEARS.forEach(y => { const b = $('yrBtn_' + y.replace(/\s/g, '')); if (b) b.classList.toggle('active', y === currentYear); });
+  const yrRecs = getYearRecords();
+  $('sTotal').textContent = 'LKR ' + fmt(yrRecs.reduce((s, r) => s + r.amount, 0));
+  $('breakdownBox').innerHTML = !yrRecs.length
+    ? '<div style="text-align:center;color:var(--muted);font-size:.86rem">No payments recorded for ' + esc(currentYear) + '.</div>'
+    : yrRecs.map(r => `<div class="bd-row"><div><b>${esc(formatMonthsLabel(r))}</b><div style="font-size:.74rem;color:var(--muted)">No. ${esc(r.no)} • ${fd(r.date)}</div></div><div style="font-weight:700;color:var(--brand)">LKR ${fmt(r.amount)}</div></div>`).join('');
+  renderReceiptsList(yrRecs); renderFeeCard(yrRecs);
+}
+
+function toggleBreakdown() { $('breakdownBox').classList.toggle('hidden'); }
+function onBarTap(id) { promptReceiptId = (promptReceiptId === id) ? null : id; expandedReceiptId = null; renderReceiptsList(getYearRecords()); }
+function viewFullReceipt(id, ev) { if (ev) ev.stopPropagation(); promptReceiptId = null; expandedReceiptId = id; renderReceiptsList(getYearRecords()); }
+function doneReceipt() { expandedReceiptId = null; promptReceiptId = null; renderReceiptsList(getYearRecords()); }
+
+function renderReceiptsList(yrRecs) {
+  if (!yrRecs.length) { $('recList').innerHTML = `<div class="empty">No receipts in <b>${esc(currentYear)}</b>.<br>Tap <b>+ New Payment</b> below to create one.</div>`; return; }
+  $('recList').innerHTML = yrRecs.map(r => {
+    const mText = formatMonthsLabel(r);
+    const isExpanded = String(expandedReceiptId) === String(r.id);
+    const showViewBtn = String(promptReceiptId) === String(r.id);
+    if (!isExpanded) {
+      return `<div class="r-bar-wrap"><button type="button" class="r-bar" onclick="onBarTap('${r.id}')"><div><div class="rb-m">${esc(mText)}</div><div class="rb-s">No. ${esc(r.no)} • ${fd(r.date)}</div></div><div class="rb-right"><div class="rb-amt">LKR ${fmt(r.amount)}</div><span class="rb-act">${showViewBtn ? 'Selected' : 'Tap'}</span></div></button>${showViewBtn ? `<div style="margin-top:6px;text-align:right"><button type="button" class="btn sm" onclick="viewFullReceipt('${r.id}', event)">View Receipt</button></div>` : ''}</div>`;
+    }
+    return `<div class="r-bar-wrap"><div class="rc"><div class="t1">JAMIAH NALEEMIAH</div><div class="t2">P.O.BOX 1, BERUWALA</div><div class="pill"><span>BOARDING FEE</span></div><div class="rr"><span>No.</span><span class="v">${esc(r.no)}</span><span>Date</span><span class="v">${fd(r.date)}</span></div><div class="rr"><span>Adm.No</span><span class="v">${esc(r.adm)}</span><span>Class</span><span class="v">${esc(r.cls)}</span></div><div class="rr"><span>Received with thanks from</span><span class="v">${esc(r.from)}</span></div><div class="rr"><span>a sum of Rupees</span><span class="v">${esc(r.words)}</span></div><div class="rr"><span>for the month / months</span><span class="v">${esc(mText)}</span><span>being boarding fee.</span></div><div class="rr" style="margin-top:24px;align-items:center"><span>Rs.</span><span class="v">${fmt(r.amount)}</span><span style="flex:1.15;margin-left:8%;text-align:center"><span style="display:block;border-top:1px dotted #222;margin-bottom:4px"></span><span style="display:block;font-size:.76rem">Head - Student administration</span></span></div><div class="rbtn"><button type="button" class="btn" onclick="downloadReceiptImg('${r.id}')">Download Image</button><button type="button" class="btn ghost" onclick="shareReceiptImg('${r.id}')">Share</button><button type="button" class="btn ghost" onclick="openReceiptModal('${r.id}')">Edit</button><button type="button" class="btn soft" onclick="doneReceipt()">Done</button></div></div></div>`;
+  }).join('');
+}
+
+function getCalYearForCard(yrRecs) {
+  const dated = yrRecs.find(r => r.months && r.months.some(m => /^\d{4}-\d{2}$/.test(m)));
+  return dated ? dated.months.find(m => /^\d{4}-\d{2}$/.test(m)).slice(0, 4) : (yrRecs[0] && yrRecs[0].date ? yrRecs[0].date.slice(0, 4) : S.today.slice(0, 4));
+}
+
+function renderFeeCard(yrRecs) {
+  const map = {};
+  yrRecs.forEach(r => { if (r.isAdmissionFee) return; (r.months || []).forEach(m => { if (/^\d{4}-\d{2}$/.test(m)) map[Number(m.slice(5, 7)) - 1] = { no: r.no, date: r.date }; }); });
+  let cells = '';
+  for (let i = 0; i < 12; i++) { const x = map[i]; cells += `<div class="cell"><b>${M3[i]}</b>${x ? `<div class="no">${esc(x.no)}</div><div class="dt">${fd(x.date)}</div>` : ''}</div>`; }
+  $('cardBox').innerHTML = `<div class="card"><div class="yr">${esc(getCalYearForCard(yrRecs))}</div><div class="t1">JAMIAH NALEEMIAH</div><div class="t2">Hostel Fee Card</div><div class="ln">Name: <span>${esc(S.profile.name) || '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}</span></div><div class="ln">Adm. No. <span>${esc(S.profile.adm) || '&nbsp;&nbsp;&nbsp;&nbsp;'}</span> &nbsp;&nbsp; Class: <span>${esc(currentYear)}</span></div><div class="grid">${cells}</div><div class="dean">Dean - Social Sciences &amp; IT</div></div>`;
+}
+
+function wordsJS(n) {
+  n = Math.round(Number(n) || 0); if (!n) return 'Zero Rupees Only';
+  const A = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const B = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  const b = x => { let s = ''; if (x >= 100) { s += A[Math.floor(x / 100)] + ' Hundred'; x %= 100; if (x) s += ' and '; } if (x >= 20) { s += B[Math.floor(x / 10)]; if (x % 10) s += '-' + A[x % 10]; } else if (x > 0) s += A[x]; return s; };
+  const o = [], m = Math.floor(n / 1e6); if (m) o.push(b(m) + ' Million'); n %= 1e6; const t = Math.floor(n / 1000); if (t) o.push(b(t) + ' Thousand'); n %= 1000; if (n) o.push(b(n));
+  return o.join(' ') + ' Rupees Only';
+}
+
+const SER = '"Times New Roman", Georgia, serif';
+function rrect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
+function dotted(g, x1, x2, y, w) { g.save(); g.setLineDash([3, 6]); g.lineWidth = w || 2; g.strokeStyle = '#222'; g.beginPath(); g.moveTo(x1, y); g.lineTo(x2, y); g.stroke(); g.restore(); }
+function drawField(g, lab, val, x, y, x2) {
+  g.fillStyle = '#222'; g.font = '31px ' + SER; g.fillText(lab, x, y);
+  const sx = x + g.measureText(lab).width + 12; dotted(g, sx, x2, y + 6);
+  let fs = 32; g.font = 'italic ' + fs + 'px ' + SER;
+  const maxW = Math.max(80, x2 - sx - 14);
+  while (g.measureText(val).width > maxW && fs > 17) { fs -= 1.5; g.font = 'italic ' + fs + 'px ' + SER; }
+  g.fillText(val, sx + 7, y - 3);
+}
+
+function buildReceiptCanvas(r) {
+  const c = document.createElement('canvas'); c.width = 1200; c.height = 810; const g = c.getContext('2d');
+  g.fillStyle = '#fff'; g.fillRect(0, 0, 1200, 810); g.strokeStyle = '#333'; g.lineWidth = 4; g.strokeRect(14, 14, 1172, 782);
+  g.fillStyle = '#222'; g.textAlign = 'center'; g.font = 'bold 58px ' + SER; g.fillText('JAMIAH NALEEMIAH', 600, 98);
+  g.font = 'bold 34px ' + SER; g.fillText('P.O.BOX 1, BERUWALA', 600, 150);
+  g.fillStyle = '#3a3232'; rrect(g, 390, 178, 420, 68, 34); g.fill();
+  g.fillStyle = '#fff'; g.font = 'italic bold 39px ' + SER; g.fillText('BOARDING FEE', 600, 226);
+  g.textAlign = 'left';
+  drawField(g, 'No.', r.no, 55, 330, 580); drawField(g, 'Date', fd(r.date), 640, 330, 1145);
+  drawField(g, 'Adm.No', r.adm, 55, 410, 580); drawField(g, 'Class', r.cls, 640, 410, 1145);
+  drawField(g, 'Received with thanks from', r.from, 55, 490, 1145);
+  drawField(g, 'a sum of Rupees', wordsJS(r.amount), 55, 570, 1145);
+  drawField(g, 'for the month / months', formatMonthsLabel(r), 55, 650, 855);
+  g.fillStyle = '#222'; g.font = '31px ' + SER; g.fillText('being boarding fee.', 868, 650);
+  drawField(g, 'Rs.', fmt(r.amount), 55, 742, 430);
+  dotted(g, 680, 1145, 748); g.fillStyle = '#222'; g.font = '30px ' + SER; g.textAlign = 'center';
+  g.fillText('Head - Student administration', 912, 782);
+  return c;
+}
+
+function buildCardCanvas() {
+  const yrRecs = getYearRecords(), calYr = getCalYearForCard(yrRecs), map = {};
+  yrRecs.forEach(r => { if (r.isAdmissionFee) return; (r.months || []).forEach(m => { if (/^\d{4}-\d{2}$/.test(m)) map[Number(m.slice(5, 7)) - 1] = { no: r.no, date: r.date }; }); });
+  const c = document.createElement('canvas'); c.width = 1100; c.height = 1480; const g = c.getContext('2d');
+  g.fillStyle = '#f8e3b8'; g.fillRect(0, 0, 1100, 1480); g.strokeStyle = '#111'; g.lineWidth = 4; g.strokeRect(20, 20, 1060, 1440); g.lineWidth = 2; g.strokeRect(34, 34, 1032, 1412);
+  g.fillStyle = '#111'; g.textAlign = 'right'; g.font = 'bold 44px ' + SER; g.fillText(calYr, 1020, 108);
+  g.textAlign = 'center'; g.font = 'bold 78px ' + SER; g.fillText('JAMIAH NALEEMIAH', 550, 225); g.font = 'bold 60px ' + SER; g.fillText('Hostel Fee Card', 550, 315);
+  g.textAlign = 'left'; const p = S.profile;
+  g.font = 'bold 42px ' + SER; g.fillText('Name:', 70, 425); dotted(g, 200, 1030, 435, 3); g.font = 'italic bold 42px ' + SER; g.fillText(p.name, 214, 423);
+  g.font = 'bold 42px ' + SER; g.fillText('Adm. No.', 70, 510); dotted(g, 255, 520, 520, 3); g.font = 'italic bold 42px ' + SER; g.fillText(p.adm, 268, 508);
+  g.font = 'bold 42px ' + SER; g.fillText('Class:', 560, 510); dotted(g, 690, 1030, 520, 3); g.font = 'italic bold 42px ' + SER; g.fillText(currentYear, 704, 508);
+  const x0 = 70, y0 = 565, cw = 240, ch = 250; g.lineWidth = 4; g.strokeStyle = '#111'; g.strokeRect(x0, y0, cw * 4, ch * 3);
+  for (let i = 1; i < 4; i++) { g.beginPath(); g.moveTo(x0 + i * cw, y0); g.lineTo(x0 + i * cw, y0 + ch * 3); g.stroke(); }
+  for (let i = 1; i < 3; i++) { g.beginPath(); g.moveTo(x0, y0 + i * ch); g.lineTo(x0 + cw * 4, y0 + i * ch); g.stroke(); }
+  g.textAlign = 'center';
+  for (let i = 0; i < 12; i++) { const cx = x0 + (i % 4) * cw + cw / 2, cy = y0 + Math.floor(i / 4) * ch, x = map[i]; g.fillStyle = '#111'; g.font = 'bold 46px ' + SER; g.fillText(M3[i], cx, cy + 62); if (x) { g.font = 'bold 42px ' + SER; g.fillText(x.no, cx, cy + 140); g.font = '32px ' + SER; g.fillText(fd(x.date), cx, cy + 195); } }
+  g.textAlign = 'left'; g.font = 'italic bold 40px ' + SER; g.fillText('Dean - Social Sciences & IT', 90, 1405);
+  return c;
+}
+
+function triggerDownload(canvas, filename) { const a = document.createElement('a'); a.href = canvas.toDataURL('image/jpeg', 0.94); a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
+async function triggerShare(canvas, filename, titleText) {
+  canvas.toBlob(async blob => { const file = new File([blob], filename, { type: 'image/jpeg' }); if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: titleText }); return; } catch (e) {} } triggerDownload(canvas, filename); }, 'image/jpeg', 0.94);
+}
+function downloadReceiptImg(id) { const r = S.records.find(x => String(x.id) === String(id)); if (r) triggerDownload(buildReceiptCanvas(r), `Receipt_${r.no}.jpg`); }
+function shareReceiptImg(id) { const r = S.records.find(x => String(x.id) === String(id)); if (r) triggerShare(buildReceiptCanvas(r), `Receipt_${r.no}.jpg`, `Boarding Fee Receipt #${r.no}`); }
+function downloadCardImg() { triggerDownload(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.jpg`); }
+function shareCardImg() { triggerShare(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.jpg`, `Hostel Fee Card - ${currentYear}`); }
+
+function openReceiptModal(id) {
+  $('fErr').textContent = ''; delArmed = false; $('fDel').textContent = 'Delete Receipt'; $('monthPickerGrid').classList.add('hidden');
+  const p = S.profile;
+  if (id) {
+    const r = S.records.find(x => String(x.id) === String(id));
+    editingId = r.id; $('fTitle').textContent = 'Edit Receipt'; $('fNo').value = r.no; $('fDate').value = r.date || S.today;
+    $('fAdm').value = r.adm; $('fCls').value = r.cls || p.cls || currentYear; $('fCardYear').value = r.acadYear || 'None';
+    $('fFrom').value = r.from; $('fIsAdmFee').checked = Boolean(r.isAdmissionFee);
+    selectedMonths = (r.months || []).filter(m => m !== 'ADMISSION').slice(); setAmtValue(r.amount, Boolean(r.isAdmissionFee));
+    $('fDelRow').classList.remove('hidden');
+  } else {
+    editingId = null; $('fTitle').textContent = 'Create Receipt'; $('fNo').value = ''; $('fDate').value = S.today;
+    $('fAdm').value = p.adm || ''; $('fCls').value = currentYear; $('fCardYear').value = currentYear;
+    $('fIsAdmFee').checked = false; $('fFrom').value = p.name || ''; selectedMonths = [];
+    setAmtValue(p.amount || '8000', false); $('fDelRow').classList.add('hidden');
+  }
+  onClassChange(false); renderSelectedMonths(); updateWordsPreview(); $('ovRec').classList.remove('hidden');
+}
+
+function onClassChange(autoSetCardYear = true) {
+  const isFirstYear = ($('fCls').value === '1st year') || ($('fCardYear').value === '1st year');
+  $('admFeeRow').classList.toggle('hidden', !isFirstYear);
+  if (!isFirstYear && $('fIsAdmFee').checked) $('fIsAdmFee').checked = false;
+  if (autoSetCardYear && !$('fIsAdmFee').checked) $('fCardYear').value = $('fCls').value;
+  toggleAdmissionFeeMode();
+}
+
+function toggleAdmissionFeeMode() {
+  const isAdm = $('fIsAdmFee').checked;
+  if (isAdm) $('fCardYear').value = 'None';
+  $('monthSection').classList.toggle('hidden', isAdm); $('admLabelSection').classList.toggle('hidden', !isAdm);
+  $('fAmtSelect').classList.toggle('hidden', isAdm); $('fAmtManual').classList.toggle('hidden', !isAdm);
+  if (isAdm && !$('fAmtManual').value) $('fAmtManual').value = $('fAmtSelect').value || '';
+  updateWordsPreview();
+}
+
+function setAmtValue(val, isAdm) {
+  const s = String(val || '8000'), el = $('fAmtSelect');
+  if (![...el.options].some(o => o.value === s)) { const opt = document.createElement('option'); opt.value = s; opt.textContent = 'Rs. ' + fmt(s); el.appendChild(opt); }
+  el.value = s; $('fAmtManual').value = isAdm ? s : '';
+}
+function getCurrentFormAmount() { return $('fIsAdmFee').checked ? Number($('fAmtManual').value) : Number($('fAmtSelect').value); }
+function closeReceiptModal() { $('ovRec').classList.add('hidden'); }
+
+function renderSelectedMonths() {
+  $('selectedMonthsBox').innerHTML = selectedMonths.map(ym => `<span class="m-chip">${MON[Number(ym.slice(5, 7)) - 1]} <button type="button" onclick="removeMonth('${ym}')">×</button></span>`).join('') + `<button type="button" class="plus-btn" onclick="toggleMonthGrid()">+</button>`;
+}
+function toggleMonthGrid() {
+  const grid = $('monthPickerGrid'), show = grid.classList.contains('hidden');
+  grid.classList.toggle('hidden', !show);
+  if (show) { const baseYr = ($('fDate').value || S.today).slice(0, 4); grid.innerHTML = MON.map((m, idx) => { const ym = baseYr + '-' + String(idx + 1).padStart(2, '0'); return `<button type="button" class="mg-btn ${selectedMonths.includes(ym) ? 'sel' : ''}" onclick="toggleMonthChoice('${ym}')">${m}</button>`; }).join(''); }
+}
+function toggleMonthChoice(ym) { selectedMonths = selectedMonths.includes(ym) ? selectedMonths.filter(x => x !== ym) : [...selectedMonths, ym].sort(); renderSelectedMonths(); $('monthPickerGrid').classList.add('hidden'); }
+function removeMonth(ym) { selectedMonths = selectedMonths.filter(x => x !== ym); renderSelectedMonths(); }
+function updateWordsPreview() { $('fWordsPreview').value = wordsJS(getCurrentFormAmount()); }
+
+async function saveReceipt() {
+  const isAdm = $('fIsAdmFee').checked, amt = getCurrentFormAmount(), cardYrChoice = $('fCardYear').value;
+  const effectiveAcadYear = (cardYrChoice === 'None') ? ($('fCls').value || currentYear) : cardYrChoice;
+  const monthsArr = isAdm ? ['ADMISSION'] : selectedMonths.slice().sort();
+  const E = t => $('fErr').textContent = t; E('');
+  if (!$('fFrom').value.trim() || !$('fAdm').value.trim()) return E('Please set Name & Adm.No in Edit Profile first');
+  if (!$('fNo').value.trim()) return E('Enter No.');
+  if (!$('fDate').value) return E('Select Date');
+  if (!isAdm && !monthsArr.length) return E('Tap + to select at least one month');
+  if (!(amt > 0)) return E('Enter a valid amount');
+
+  const payload = {
+    acad_year: effectiveAcadYear,
+    fee_month: monthsArr[0],
+    payment_date: $('fDate').value,
+    amount: amt,
+    receipt_no: $('fNo').value.trim(),
+    adm_no: $('fAdm').value.trim(),
+    class_name: $('fCls').value,
+    received_from: $('fFrom').value.trim(),
+    amount_words: wordsJS(amt),
+    months_list: monthsArr.join(','),
+    is_admission: isAdm
+  };
+
+  busy(true);
+  try {
+    const { error } = editingId
+      ? await sb.from('fee_records').update(payload).eq('id', editingId)
+      : await sb.from('fee_records').insert(payload);
+    if (error) throw error;
+    currentYear = effectiveAcadYear; expandedReceiptId = null; promptReceiptId = null;
+    await reloadData(); closeReceiptModal(); setTab('rec');
+  } catch (e) { E(e.message || 'Save failed'); }
+  busy(false);
+}
+
+async function deleteRec() {
+  if (!delArmed) { delArmed = true; $('fDel').textContent = 'Tap again to confirm delete'; return; }
+  busy(true);
+  try {
+    const { error } = await sb.from('fee_records').delete().eq('id', editingId);
+    if (error) throw error;
+    expandedReceiptId = null; promptReceiptId = null; await reloadData(); closeReceiptModal();
+  } catch (e) { $('fErr').textContent = e.message || 'Delete failed'; }
+  busy(false);
+}
+
+function openProfileModal() {
+  toggleMenu(false); $('pErr').textContent = ''; uploadedPhotoB64 = undefined; const p = S.profile;
+  $('pName').value = p.name || ''; $('pAdm').value = p.adm || ''; $('pCls').value = p.cls || '1st year'; $('pAmt').value = p.amount || '8000';
+  $('profPreview').src = p.photo || DEFAULT_AVATAR; $('ovProf').classList.remove('hidden');
+}
+function closeProfileModal() { $('ovProf').classList.add('hidden'); }
+
+function handlePhotoUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); c.width = 240; c.height = 240; const g = c.getContext('2d'), min = Math.min(img.width, img.height); g.drawImage(img, (img.width - min)/2, (img.height - min)/2, min, min, 0, 0, 240, 240); uploadedPhotoB64 = c.toDataURL('image/jpeg', 0.85); $('profPreview').src = uploadedPhotoB64; }; img.src = e.target.result; };
+  reader.readAsDataURL(file);
+}
+
+async function saveProfile() {
+  const name = $('pName').value.trim(), adm = $('pAdm').value.trim();
+  if (!name || !adm) return $('pErr').textContent = 'Enter both Name and Adm.No';
+  const upd = { id: 1, student_name: name, adm_no: adm, default_class: $('pCls').value, default_amount: $('pAmt').value };
+  if (uploadedPhotoB64 !== undefined) upd.login_photo = uploadedPhotoB64;
+  busy(true);
+  try {
+    const { error } = await sb.from('fee_profile').upsert(upd);
+    if (error) throw error;
+    await reloadData(); currentYear = S.profile.cls; renderAll(); closeProfileModal();
+  } catch (e) { $('pErr').textContent = e.message || 'Save failed'; }
+  busy(false);
+}
+</script>
+</body>
+</html>
