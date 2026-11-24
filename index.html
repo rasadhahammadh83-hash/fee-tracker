@@ -95,22 +95,36 @@ button,input,select{font:inherit;color:inherit}
 .tab{flex:1;padding:9px;border-radius:11px;border:1.5px solid var(--brand);background:#fff;color:var(--brand);font-weight:700;font-size:.86rem;cursor:pointer}
 .tab.on{background:var(--brand);color:#fff}
 
-/* SINGLE FULL BAR WITH THREE DOTS AT RIGHT EDGE */
+/* SINGLE UNIFIED BAR WITH THREE DOTS INSIDE RIGHT EDGE */
 .r-bar-wrap{margin-bottom:9px;position:relative}
-.r-bar{width:100%;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--brand);border-radius:12px;
-  padding:11px 8px 11px 13px;display:flex;align-items:center;justify-content:space-between;gap:8px;box-shadow:0 3px 10px rgba(13,76,92,.05)}
+.r-bar{
+  width:100%;background:var(--card);border:1px solid var(--line);border-left:5px solid var(--brand);
+  border-radius:12px;padding:11px 6px 11px 13px;display:flex;align-items:center;
+  justify-content:space-between;gap:6px;box-shadow:0 3px 10px rgba(13,76,92,.05);cursor:pointer;text-align:left
+}
 .r-bar.extra-bar{border-left-color:var(--accent)}
-.r-bar-main{flex:1;min-width:0;display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;text-align:left;background:transparent;border:0;padding:0}
+.r-bar-info{flex:1;min-width:0}
 .r-bar .rb-m{font-weight:700;font-size:.94rem;color:var(--ink)}
 .r-bar .rb-s{font-size:.76rem;color:var(--muted);margin-top:2px}
 .r-bar .rb-right{text-align:right;white-space:nowrap}
 .r-bar .rb-amt{font-weight:800;font-size:.92rem;color:var(--brand)}
 .r-bar .rb-act{display:inline-block;margin-top:3px;font-size:.72rem;font-weight:700;color:var(--accent);background:#e3f4ee;padding:2px 8px;border-radius:12px}
 
-.dots-btn{background:transparent;border:0;border-radius:8px;width:28px;height:36px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800;color:var(--muted);cursor:pointer;flex-shrink:0;padding:0}
+.dots-btn{
+  background:transparent;border:0;border-radius:8px;width:26px;height:36px;
+  display:inline-flex;align-items:center;justify-content:center;font-size:1.2rem;
+  font-weight:800;color:var(--muted);cursor:pointer;flex-shrink:0;padding:0;margin-left:2px
+}
 .dots-btn:active{background:#eef4f3;color:var(--ink)}
-.dots-menu{position:absolute;right:8px;top:calc(100% + 4px);background:#fff;border:1.5px solid var(--line);border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.16);z-index:20;padding:5px;min-width:155px}
-.dots-del-btn{width:100%;background:#fff1ef;color:var(--miss);border:0;border-radius:8px;padding:9px 12px;font-weight:700;font-size:.84rem;text-align:left;cursor:pointer;display:flex;align-items:center;gap:6px}
+.dots-menu{
+  position:absolute;right:8px;top:calc(100% + 4px);background:#fff;border:1.5px solid var(--line);
+  border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.16);z-index:20;padding:5px;min-width:155px
+}
+.dots-del-btn{
+  width:100%;background:#fff1ef;color:var(--miss);border:0;border-radius:8px;
+  padding:9px 12px;font-weight:700;font-size:.84rem;text-align:left;cursor:pointer;
+  display:flex;align-items:center;gap:6px
+}
 .dots-del-btn:active{background:#ffe0dc}
 
 .rc{background:#fff;border:1.5px solid #333;box-shadow:0 8px 22px rgba(0,0,0,.09);border-radius:8px;padding:16px 13px 14px;margin-top:6px;margin-bottom:14px;font-family:'Times New Roman',Georgia,serif;color:#222}
@@ -393,6 +407,7 @@ let selectedMonths = [], editingId = null, uploadedPhotoB64 = undefined;
 let formPaymentType = 'monthly';
 let expandedReceiptId = null, promptReceiptId = null, openDotsId = null;
 let pendingDeleteId = null, pendingPermDeleteId = null;
+let ignoringPop = false;
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -401,13 +416,13 @@ const fd = iso => iso ? iso.split('-').reverse().join('/') : '';
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const busy = b => $('busy').classList.toggle('hidden', !b);
 
-/* PERSIST PAGE STATE ON REFRESH */
+/* PERSIST PAGE STATE ACROSS REFRESH (sessionStorage so Back to Login stays locked) */
 function persistPageState() {
   try {
-    localStorage.setItem('ft_session_unlocked', S ? '1' : '0');
-    localStorage.setItem('ft_current_year', currentYear);
-    localStorage.setItem('ft_active_tab', activeTab);
-    localStorage.setItem('ft_view_mode', viewMode);
+    sessionStorage.setItem('ft_session_unlocked', S ? '1' : '0');
+    sessionStorage.setItem('ft_current_year', currentYear);
+    sessionStorage.setItem('ft_active_tab', activeTab);
+    sessionStorage.setItem('ft_view_mode', viewMode);
   } catch (e) {}
 }
 
@@ -425,28 +440,51 @@ function removeFromBinLocal(id) {
   saveBinIds(getBinIds().filter(x => x !== String(id)));
 }
 
+/* PROPER BACK NAVIGATION TRAP */
+function armBackTrap() {
+  try {
+    history.pushState({ ftPortal: true, t: Date.now() }, '', '#portal');
+  } catch (e) {}
+}
+
 function handleBackAction() {
+  if (ignoringPop) { ignoringPop = false; return; }
   if (!S) return;
-  if (!$('ovConfirmDel').classList.contains('hidden')) { closeConfirmDel(); return; }
-  if (!$('ovPermDel').classList.contains('hidden')) { closePermDel(); return; }
-  if (!$('ovRec').classList.contains('hidden')) { closeReceiptModal(); return; }
-  if (!$('ovProf').classList.contains('hidden')) { closeProfileModal(); return; }
-  if ($('drawer').classList.contains('open')) { toggleMenu(false); return; }
-  if (openDotsId) { openDotsId = null; renderAll(); return; }
-  if (viewMode === 'bin') { goDashboard(); return; }
-  if (expandedReceiptId) { expandedReceiptId = null; renderAll(); return; }
-  if (promptReceiptId) { promptReceiptId = null; renderAll(); return; }
-  if (activeTab === 'card') { setTab('rec'); return; }
+
+  if (!$('ovConfirmDel').classList.contains('hidden')) { closeConfirmDel(); armBackTrap(); return; }
+  if (!$('ovPermDel').classList.contains('hidden')) { closePermDel(); armBackTrap(); return; }
+  if (!$('ovRec').classList.contains('hidden')) { closeReceiptModal(); armBackTrap(); return; }
+  if (!$('ovProf').classList.contains('hidden')) { closeProfileModal(); armBackTrap(); return; }
+  if ($('drawer').classList.contains('open')) { toggleMenu(false); armBackTrap(); return; }
+  if (openDotsId) { openDotsId = null; renderAll(); armBackTrap(); return; }
+  if (viewMode === 'bin') { goDashboard(); armBackTrap(); return; }
+  if (expandedReceiptId) { expandedReceiptId = null; renderAll(); armBackTrap(); return; }
+  if (promptReceiptId) { promptReceiptId = null; renderAll(); armBackTrap(); return; }
+  if (activeTab === 'card') { setTab('rec'); armBackTrap(); return; }
+
   const defYr = S.profile.cls || '1st year';
-  if (currentYear !== defYr) { currentYear = defYr; persistPageState(); renderAll(); return; }
+  if (currentYear !== defYr) {
+    currentYear = defYr;
+    persistPageState();
+    renderAll();
+    armBackTrap();
+    return;
+  }
+
+  // On main dashboard -> Back returns to main Login Page
+  lockToLogin();
 }
 window.addEventListener('popstate', handleBackAction);
 
 function lockToLogin() {
   S = null; expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
-  localStorage.setItem('ft_session_unlocked', '0');
+  try { sessionStorage.setItem('ft_session_unlocked', '0'); } catch (e) {}
   $('pin').value = ''; $('lockErr').textContent = '';
   $('app').classList.add('hidden'); $('lock').classList.remove('hidden');
+  if (location.hash === '#portal') {
+    ignoringPop = true;
+    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  }
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -454,20 +492,20 @@ window.addEventListener('DOMContentLoaded', async () => {
   const cachedPhoto = localStorage.getItem('ft_avatar');
   if (cachedPhoto) $('loginAvatar').src = cachedPhoto;
 
-  // Restore session automatically on page refresh
-  const wasUnlocked = localStorage.getItem('ft_session_unlocked') === '1';
+  const wasUnlocked = sessionStorage.getItem('ft_session_unlocked') === '1';
   if (wasUnlocked) {
     $('lock').classList.add('hidden');
     $('app').classList.remove('hidden');
     busy(true);
     try {
       S = await fetchAllFromSupabase();
-      const savedYr = localStorage.getItem('ft_current_year');
-      const savedTab = localStorage.getItem('ft_active_tab');
-      const savedView = localStorage.getItem('ft_view_mode');
+      const savedYr = sessionStorage.getItem('ft_current_year');
+      const savedTab = sessionStorage.getItem('ft_active_tab');
+      const savedView = sessionStorage.getItem('ft_view_mode');
       currentYear = (savedYr && YEARS.includes(savedYr)) ? savedYr : (S.profile.cls || '1st year');
       activeTab = (savedTab === 'card') ? 'card' : 'rec';
       viewMode = (savedView === 'bin') ? 'bin' : 'dashboard';
+      armBackTrap();
       syncProfileUI();
       setTab(activeTab);
       renderAll();
@@ -553,6 +591,7 @@ async function unlock() {
     activeTab = 'rec';
     viewMode = 'dashboard';
     expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
+    armBackTrap();
     persistPageState();
     syncProfileUI(); setTab('rec'); renderAll();
     if (!S.profile.name || !S.profile.adm) openProfileModal();
@@ -691,17 +730,15 @@ function renderReceiptsList(yrRecs) {
 
     if (!isExpanded) {
       return `<div class="r-bar-wrap">
-        <div class="r-bar ${r.isExtra ? 'extra-bar' : ''}">
-          <button type="button" class="r-bar-main" onclick="onBarTap('${r.id}')">
-            <div>
-              <div class="rb-m">${esc(mText)}</div>
-              <div class="rb-s">No. ${esc(r.no)} • ${fd(r.date)}</div>
-            </div>
-            <div class="rb-right">
-              <div class="rb-amt">LKR ${fmt(r.amount)}</div>
-              <span class="rb-act">${showViewBtn ? 'Selected' : 'Tap'}</span>
-            </div>
-          </button>
+        <div class="r-bar ${r.isExtra ? 'extra-bar' : ''}" onclick="onBarTap('${r.id}')">
+          <div class="r-bar-info">
+            <div class="rb-m">${esc(mText)}</div>
+            <div class="rb-s">No. ${esc(r.no)} • ${fd(r.date)}</div>
+          </div>
+          <div class="rb-right">
+            <div class="rb-amt">LKR ${fmt(r.amount)}</div>
+            <span class="rb-act">${showViewBtn ? 'Selected' : 'Tap'}</span>
+          </div>
           <button type="button" class="dots-btn" onclick="toggleDotsMenu('${r.id}', event)" aria-label="Record options">⋮</button>
         </div>
         ${isMenuOpen ? `<div class="dots-menu" onclick="event.stopPropagation()">
@@ -885,7 +922,6 @@ function shareReceiptImg(id) { const r = S.allRecords.find(x => String(x.id) ===
 function downloadCardImg() { triggerDownload(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.jpg`); }
 function shareCardImg() { triggerShare(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.jpg`, `Hostel Fee Card - ${currentYear}`); }
 
-/* RECEIPT MODAL LOGIC */
 function openReceiptModal(id, typeOverride) {
   $('fErr').textContent = '';
   $('monthPickerGrid').classList.add('hidden');
