@@ -416,7 +416,6 @@ const fd = iso => iso ? iso.split('-').reverse().join('/') : '';
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const busy = b => $('busy').classList.toggle('hidden', !b);
 
-/* PERSIST PAGE STATE ACROSS REFRESH (sessionStorage so Back to Login stays locked) */
 function persistPageState() {
   try {
     sessionStorage.setItem('ft_session_unlocked', S ? '1' : '0');
@@ -440,14 +439,16 @@ function removeFromBinLocal(id) {
   saveBinIds(getBinIds().filter(x => x !== String(id)));
 }
 
-/* PROPER BACK NAVIGATION TRAP */
+/* TWO-STEP BACK TRAP SO DASHBOARD BACK STOPS AT LOGIN PAGE */
 function armBackTrap() {
   try {
-    history.pushState({ ftPortal: true, t: Date.now() }, '', '#portal');
+    const base = location.pathname + location.search;
+    history.replaceState({ ftGuard: 'lock' }, '', base + '#login');
+    history.pushState({ ftGuard: 'dash', t: Date.now() }, '', base + '#portal');
   } catch (e) {}
 }
 
-function handleBackAction() {
+function handleBackAction(ev) {
   if (ignoringPop) { ignoringPop = false; return; }
   if (!S) return;
 
@@ -471,19 +472,19 @@ function handleBackAction() {
     return;
   }
 
-  // On main dashboard -> Back returns to main Login Page
-  lockToLogin();
+  // Stop right on Login Page without exiting browser
+  lockToLogin(true);
 }
 window.addEventListener('popstate', handleBackAction);
 
-function lockToLogin() {
+function lockToLogin(fromBack = false) {
   S = null; expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
   try { sessionStorage.setItem('ft_session_unlocked', '0'); } catch (e) {}
   $('pin').value = ''; $('lockErr').textContent = '';
   $('app').classList.add('hidden'); $('lock').classList.remove('hidden');
-  if (location.hash === '#portal') {
+  if (!fromBack) {
     ignoringPop = true;
-    try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+    try { history.replaceState(null, '', location.pathname + location.search + '#login'); } catch (e) {}
   }
 }
 
