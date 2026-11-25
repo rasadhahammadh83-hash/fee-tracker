@@ -56,21 +56,48 @@ button,input,select{font:inherit;color:inherit}
 .btn.sm{padding:8px 12px;font-size:.84rem;border-radius:10px}
 
 .topbar{position:sticky;top:0;z-index:15;background:#ffffff;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line)}
+.topbar-left{display:flex;align-items:center;gap:8px}
 .menu-btn{background:#f7faf9;border:1px solid var(--line);border-radius:11px;width:40px;height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer}
 .menu-btn span{width:19px;height:2.2px;background:var(--brand);border-radius:2px;display:block}
+.refresh-btn{background:var(--brand-light);border:1px solid rgba(13,76,92,.2);border-radius:11px;height:40px;padding:0 11px;display:inline-flex;align-items:center;gap:5px;color:var(--brand);font-weight:700;font-size:.82rem;cursor:pointer}
+.refresh-btn:active{transform:scale(.96);background:#d2e7ec}
+.refresh-btn.spinning .ref-icon{display:inline-block;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .top-info{text-align:right}
 .top-info .t-main{font-weight:800;font-size:1rem;color:var(--brand)}
 .top-info .t-yr{font-size:.75rem;font-weight:700;color:var(--accent);background:var(--brand-light);padding:2px 8px;border-radius:20px;display:inline-block}
 
 .drawer-ov{position:fixed;inset:0;background:rgba(10,25,25,.45);z-index:30;opacity:0;pointer-events:none;transition:.25s}
 .drawer-ov.open{opacity:1;pointer-events:auto}
-.drawer{position:fixed;top:0;bottom:0;left:0;width:55%;max-width:270px;min-width:215px;background:#fff;z-index:35;
+.drawer{position:fixed;top:0;bottom:0;left:0;width:68%;max-width:295px;min-width:230px;background:#fff;z-index:35;
   transform:translateX(-100%);transition:transform .28s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;box-shadow:10px 0 35px rgba(0,0,0,.18);border-radius:0 22px 22px 0;overflow-y:auto}
 .drawer.open{transform:translateX(0)}
-.d-head{padding:18px 14px 12px;background:linear-gradient(135deg,var(--brand),#16697a);color:#fff}
+.d-head{padding:16px 14px 12px;background:linear-gradient(135deg,var(--brand),#16697a);color:#fff}
 .d-head .d-name{font-weight:700;font-size:.94rem;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .d-head .d-adm{font-size:.76rem;opacity:.85}
-.d-nav{padding:10px;flex:1}
+
+/* MENU ALL-YEARS GRAND TOTAL BOX (MATCHING DASHBOARD SUMMARY CARD STYLE) */
+.menu-total-wrap{padding:10px 10px 4px}
+.menu-sum-card{
+  background:linear-gradient(135deg,var(--brand) 0%,#14687a 100%);
+  color:#fff;border-radius:16px;padding:13px 14px;
+  box-shadow:0 8px 20px rgba(13,76,92,.22);cursor:pointer;position:relative
+}
+.menu-sum-card::after{
+  content:"All Years ▾";position:absolute;right:10px;bottom:10px;
+  font-size:.66rem;background:rgba(255,255,255,.18);padding:2px 7px;border-radius:20px
+}
+.menu-sum-lbl{font-size:.73rem;opacity:.9;font-weight:700;letter-spacing:.2px}
+.menu-sum-val{font-size:1.38rem;font-weight:800;margin:2px 0 2px;letter-spacing:-.3px}
+.menu-sum-sub{font-size:.71rem;opacity:.88}
+.menu-yr-breakdown{
+  background:#f7faf9;border:1px solid var(--line);border-radius:12px;
+  padding:8px 10px;margin-top:6px;font-size:.78rem
+}
+.menu-yr-row{display:flex;justify-content:space-between;padding:4px 2px;border-bottom:1px dashed var(--line)}
+.menu-yr-row:last-child{border-bottom:0}
+
+.d-nav{padding:8px 10px 14px;flex:1}
 .nav-item{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:0;background:transparent;border-radius:11px;font-weight:600;font-size:.9rem;color:var(--ink);cursor:pointer;text-align:left;margin-bottom:4px}
 .nav-item.active{background:var(--brand-light);color:var(--brand);font-weight:700}
 .nav-group-btn{justify-content:space-between}
@@ -205,7 +232,13 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
 
 <div id="app" onclick="closeAllDotsMenus()">
   <div class="topbar">
-    <button class="menu-btn" onclick="event.stopPropagation();toggleMenu(true)" aria-label="Menu"><span></span><span></span><span></span></button>
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="event.stopPropagation();toggleMenu(true)" aria-label="Menu"><span></span><span></span><span></span></button>
+      <button type="button" class="refresh-btn" id="btnRefresh" onclick="manualRefresh(event)" aria-label="Refresh">
+        <span class="ref-icon">↻</span>
+        <span>Refresh</span>
+      </button>
+    </div>
     <div class="top-info">
       <div class="t-main">FEE TRACKER</div>
       <div class="t-yr" id="activeYearBadge">1st year</div>
@@ -219,6 +252,17 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
       <div class="d-name" id="menuName">Student</div>
       <div class="d-adm" id="menuAdm">Adm. No: -</div>
     </div>
+
+    <!-- FIRST BOX IN MENU: ALL YEARS GRAND TOTAL (1ST TO 7TH YEAR) -->
+    <div class="menu-total-wrap">
+      <div class="menu-sum-card" onclick="toggleMenuYearBreakdown()">
+        <div class="menu-sum-lbl">Total Paid (All Years)</div>
+        <div class="menu-sum-val" id="menuAllTotal">LKR 0</div>
+        <div class="menu-sum-sub">1st Year – 7th Year Combined</div>
+      </div>
+      <div id="menuYearBreakdown" class="menu-yr-breakdown hidden"></div>
+    </div>
+
     <div class="d-nav">
       <button class="nav-item active" id="navDash" onclick="goDashboard()">Dashboard</button>
       <button class="nav-item nav-group-btn" onclick="toggleYearsList()"><span>Years</span><span id="yrArrow">▾</span></button>
@@ -409,7 +453,7 @@ let selectedMonths = [], editingId = null, uploadedPhotoB64 = undefined;
 let formPaymentType = 'monthly';
 let expandedReceiptId = null, promptReceiptId = null, openDotsId = null;
 let pendingDeleteId = null, pendingPermDeleteId = null;
-let trapTimer = null;
+let trapTimer = null, realtimeChannel = null, isRefreshing = false;
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -483,7 +527,6 @@ function handleBackAction() {
     return;
   }
 
-  // On dashboard -> Back brings user straight to Login Screen and holds there
   lockToLogin(true);
 }
 window.addEventListener('popstate', handleBackAction);
@@ -499,8 +542,65 @@ function lockToLogin(stayOnLogin = false) {
   }
 }
 
+/* REALTIME & APP RESUME REFRESH FOR WEB APK */
+function setupRealtimeAndResume() {
+  if (!realtimeChannel) {
+    try {
+      realtimeChannel = sb.channel('fee_records_live_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'fee_records' }, async () => {
+          if (S && !isRefreshing) {
+            await silentSync();
+          }
+        })
+        .subscribe();
+    } catch (e) {}
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && S && !isRefreshing) {
+      silentSync();
+    }
+  });
+
+  window.addEventListener('focus', () => {
+    if (S && !isRefreshing) {
+      silentSync();
+    }
+  });
+}
+
+async function silentSync() {
+  if (!S || isRefreshing) return;
+  isRefreshing = true;
+  try {
+    S = await fetchAllFromSupabase();
+    syncProfileUI();
+    renderAll();
+  } catch (e) {}
+  isRefreshing = false;
+}
+
+async function manualRefresh(ev) {
+  if (ev) ev.stopPropagation();
+  if (!S || isRefreshing) return;
+  isRefreshing = true;
+  const btn = $('btnRefresh');
+  if (btn) btn.classList.add('spinning');
+  try {
+    S = await fetchAllFromSupabase();
+    syncProfileUI();
+    renderAll();
+  } catch (e) {
+    alert(e.message || 'Refresh failed');
+  }
+  if (btn) btn.classList.remove('spinning');
+  isRefreshing = false;
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   initDropdowns();
+  setupRealtimeAndResume();
+
   const cachedPhoto = localStorage.getItem('ft_avatar');
   if (cachedPhoto) $('loginAvatar').src = cachedPhoto;
 
@@ -636,8 +736,27 @@ function syncProfileUI() {
   $('menuAdm').textContent = 'Adm. No: ' + (p.adm || 'Not set');
 }
 
-function toggleMenu(open) { $('drawer').classList.toggle('open', open); $('drawerOv').classList.toggle('open', open); }
+function toggleMenu(open) {
+  $('drawer').classList.toggle('open', open);
+  $('drawerOv').classList.toggle('open', open);
+  if (open && S) renderMenuGrandTotal();
+}
 function toggleYearsList() { const el = $('yrSubList'); const h = el.classList.toggle('hidden'); $('yrArrow').textContent = h ? '▸' : '▾'; }
+function toggleMenuYearBreakdown() { $('menuYearBreakdown').classList.toggle('hidden'); }
+
+function renderMenuGrandTotal() {
+  if (!S) return;
+  const activeRecs = getActiveRecords();
+  const grandTotal = activeRecs.reduce((s, r) => s + r.amount, 0);
+  $('menuAllTotal').textContent = 'LKR ' + fmt(grandTotal);
+
+  $('menuYearBreakdown').innerHTML = YEARS.map(y => {
+    const yrSum = activeRecs
+      .filter(r => (r.acadYear || r.cls) === y)
+      .reduce((s, r) => s + r.amount, 0);
+    return `<div class="menu-yr-row"><span>${esc(y)}</span><b>LKR ${fmt(yrSum)}</b></div>`;
+  }).join('');
+}
 
 function goDashboard() {
   viewMode = 'dashboard';
@@ -692,6 +811,8 @@ function updateFabVisibility() {
 }
 
 function renderAll() {
+  renderMenuGrandTotal();
+
   const delRecs = getDeletedRecords();
   const badge = $('binCountBadge');
   badge.textContent = delRecs.length;
