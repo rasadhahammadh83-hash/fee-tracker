@@ -1263,7 +1263,10 @@ function drawField(g, lab, val, x, y, x2) {
 
 /* OLD RECEIPT IMAGE (unchanged) */
 function buildReceiptCanvas(r) {
-  const c = document.createElement('canvas'); c.width = 1200; c.height = 810; const g = c.getContext('2d');
+  const SCALE = 2;
+  const c = document.createElement('canvas'); c.width = 1200 * SCALE; c.height = 810 * SCALE; const g = c.getContext('2d');
+  g.scale(SCALE, SCALE);
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
   g.fillStyle = '#fff'; g.fillRect(0, 0, 1200, 810); g.strokeStyle = '#333'; g.lineWidth = 4; g.strokeRect(14, 14, 1172, 782);
   g.fillStyle = '#222'; g.textAlign = 'center'; g.font = 'bold 58px ' + SER; g.fillText('JAMIAH NALEEMIAH', 600, 98);
   g.font = 'bold 34px ' + SER; g.fillText('P.O.BOX 1, BERUWALA', 600, 150);
@@ -1302,8 +1305,11 @@ function cCheck(g, cx, cy, r, color) {
 function cTxt(g, t, x, y, font, color, align) { g.font = font; g.fillStyle = color; g.textAlign = align || 'left'; g.fillText(t, x, y); }
 
 function buildReceiptCanvasV2(r) {
+  const SCALE = 2;
   const W = 1240, H = 960;
-  const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+  const c = document.createElement('canvas'); c.width = W * SCALE; c.height = H * SCALE; const g = c.getContext('2d');
+  g.scale(SCALE, SCALE);
+  g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
   g.fillStyle = '#fff'; g.fillRect(0, 0, W, H);
   const NAVY = '#0b3b72', DARK = '#272d37', GREEN = '#10b981';
 
