@@ -153,7 +153,28 @@ button,input,select{font:inherit;color:inherit}
 }
 .dots-del-btn:active{background:#ffe0dc}
 
-/* NALEEMIAH PAYMENT RECEIPT CARD DESIGN */
+/* OLD RECEIPT DESIGN (FOR EXISTING / PREVIOUSLY REGISTERED RECEIPTS) */
+.old-rcpt{
+  background:#f8e3b8;border:3px double #111;padding:14px 12px 16px;
+  font-family:'Times New Roman',Georgia,serif;color:#111;margin-top:6px;margin-bottom:14px;
+  box-shadow:0 10px 26px rgba(0,0,0,.14);border-radius:4px
+}
+.old-rcpt .or-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.old-rcpt .or-crest{
+  width:46px;height:46px;border-radius:50%;border:2px solid #111;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;background:#fff5dc;flex-shrink:0
+}
+.old-rcpt .or-head{text-align:center;flex:1}
+.old-rcpt .or-t1{font-size:1.25rem;font-weight:700;letter-spacing:.3px}
+.old-rcpt .or-t2{font-size:.98rem;font-weight:700;margin-bottom:6px}
+.old-rcpt .or-row{display:flex;justify-content:space-between;font-weight:700;font-size:.88rem;margin:6px 0;gap:8px}
+.old-rcpt .or-ln{font-weight:700;font-size:.9rem;margin:7px 0;line-height:1.5}
+.old-rcpt .or-ln span{border-bottom:1px dotted #111;padding:0 6px}
+.old-rcpt .or-amt-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px;flex-wrap:wrap}
+.old-rcpt .or-rs-box{border:2px solid #111;padding:4px 10px;font-weight:700;font-size:.92rem;background:#fff5dc}
+.old-rcpt .or-sig{font-style:italic;font-weight:700;font-size:.86rem}
+
+/* NEW PAYMENT RECEIPT DESIGN (ONLY FOR NEWLY CREATED RECEIPTS FROM NOW ON) */
 .nr-wrap{
   background:#ffffff;border:1px solid #d9e2ec;border-radius:12px;
   box-shadow:0 10px 26px rgba(15,23,42,.1);padding:16px 14px 14px;
@@ -225,10 +246,10 @@ button,input,select{font:inherit;color:inherit}
 .nr-footer .nr-note{font-style:italic;margin-bottom:3px}
 
 .orig-photo-box{
-  border:1px solid #cbd5e1;border-radius:10px;overflow:hidden;background:#f8fafc;
+  border:1px solid #111;border-radius:4px;overflow:hidden;background:#fff5dc;margin-top:8px
 }
 .orig-photo-box img{
-  width:100%;height:auto;display:block;
+  width:100%;height:auto;display:block
 }
 
 .rbtn{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:13px;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
@@ -448,16 +469,18 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
       </div>
     </div>
 
-    <!-- OPTIONAL ORIGINAL RECEIPT PHOTO / SCREENSHOT -->
-    <label>Original Receipt Photo / Screenshot (Optional)</label>
-    <div class="rec-img-attach">
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-        <label class="btn sm ghost" style="cursor:pointer;margin:0">
-          Attach Receipt Photo <input type="file" accept="image/*" class="hidden" onchange="handleReceiptPhotoUpload(this)">
-        </label>
-        <button type="button" class="btn sm soft" id="btnClearRecPhoto" onclick="clearReceiptPhoto()">Remove Photo</button>
+    <!-- OPTIONAL MANUAL PHOTO (FOR OLD RECEIPTS) -->
+    <div id="photoAttachBlock">
+      <label>Manual Receipt Photo (For Old Receipts)</label>
+      <div class="rec-img-attach">
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+          <label class="btn sm ghost" style="cursor:pointer;margin:0">
+            Select Photo <input type="file" accept="image/*" class="hidden" onchange="handleReceiptPhotoUpload(this)">
+          </label>
+          <button type="button" class="btn sm soft" id="btnClearRecPhoto" onclick="clearReceiptPhoto()">Remove Photo</button>
+        </div>
+        <img id="recPhotoPreview" class="rec-img-prev hidden" src="" alt="Receipt Photo">
       </div>
-      <img id="recPhotoPreview" class="rec-img-prev hidden" src="" alt="Receipt Photo">
     </div>
 
     <div class="err" id="fErr" style="margin-top:10px"></div>
@@ -536,7 +559,7 @@ const YEARS = ['1st year','2nd year','3rd year','4th year','5th year','6th year'
 const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e2f0f3'/><circle cx='50' cy='38' r='18' fill='%230d4c5c'/><path d='M20 88c0-17 13-28 30-28s30 11 30 28' fill='%230d4c5c'/></svg>";
 
 let S = null, currentYear = '1st year', activeTab = 'rec', viewMode = 'dashboard';
-let selectedMonths = [], editingId = null, uploadedPhotoB64 = undefined, formReceiptPhoto = '';
+let selectedMonths = [], editingId = null, editingIsNewDesign = false, uploadedPhotoB64 = undefined, formReceiptPhoto = '';
 let formPaymentType = 'monthly';
 let expandedReceiptId = null, promptReceiptId = null, openDotsId = null;
 let pendingDeleteId = null, pendingPermDeleteId = null;
@@ -549,6 +572,24 @@ const fmt2 = n => Number(n || 0).toLocaleString('en-US', {minimumFractionDigits:
 const fd = iso => iso ? iso.split('-').reverse().join('/') : '';
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const busy = b => $('busy').classList.toggle('hidden', !b);
+
+function getNewDesignIds() {
+  try { return JSON.parse(localStorage.getItem('ft_new_design_ids') || '[]').map(String); } catch (e) { return []; }
+}
+function markAsNewDesign(id) {
+  if (!id) return;
+  const arr = getNewDesignIds();
+  if (!arr.includes(String(id))) {
+    arr.push(String(id));
+    localStorage.setItem('ft_new_design_ids', JSON.stringify(arr));
+  }
+}
+function unmarkNewDesign(id) {
+  localStorage.setItem('ft_new_design_ids', JSON.stringify(getNewDesignIds().filter(x => x !== String(id))));
+}
+function isNewDesignRecord(r) {
+  return getNewDesignIds().includes(String(r.id));
+}
 
 function getReceiptPhotoMap() {
   try { return JSON.parse(localStorage.getItem('ft_rec_photos') || '{}'); } catch (e) { return {}; }
@@ -785,6 +826,7 @@ async function fetchAllFromSupabase() {
     pin: String(savedPin)
   };
   const binIds = getBinIds();
+  const newIds = getNewDesignIds();
   const allRecords = (recRows || []).map(r => {
     const rawList = r.months_list ? String(r.months_list) : String(r.fee_month || '');
     const isExtra = rawList.startsWith('EXTRA:');
@@ -807,6 +849,7 @@ async function fetchAllFromSupabase() {
       from: r.received_from,
       words: r.amount_words,
       receiptPhoto: localPhoto || r.receipt_photo || '',
+      useNewDesign: newIds.includes(String(r.id)),
       isDeleted: binIds.includes(String(r.id))
     };
   });
@@ -1025,10 +1068,48 @@ function renderReceiptsList(yrRecs) {
     const headerSub = getHeaderFeeSubtitle(r);
     const invCode = getInvoiceCode(r);
     const amtFmt = 'Rs. ' + fmt2(r.amount);
+    const wordsText = r.words || wordsJS(r.amount);
 
-    const receiptBodyHtml = r.receiptPhoto
-      ? `<div class="orig-photo-box"><img src="${esc(r.receiptPhoto)}" alt="Original Receipt"></div>`
-      : `<div class="nr-top">
+    if (!r.useNewDesign) {
+      return `<div class="r-bar-wrap">
+        <div class="old-rcpt">
+          <div class="or-top">
+            <div class="or-crest">JN</div>
+            <div class="or-head">
+              <div class="or-t1">JAMIAH NALEEMIAH</div>
+              <div class="or-t2">OFFICIAL RECEIPT</div>
+            </div>
+            <div style="width:46px"></div>
+          </div>
+          <div class="or-row">
+            <div>No. <span>${esc(r.no)}</span></div>
+            <div>Date: <span>${fd(r.date)}</span></div>
+          </div>
+          <div class="or-row">
+            <div>Adm. No. <span>${esc(r.adm || '')}</span></div>
+            <div>Class: <span>${esc(r.cls || '')}</span></div>
+          </div>
+          <div class="or-ln">Received with thanks from <span>${esc(r.from || '')}</span></div>
+          <div class="or-ln">for the month / months <span>${esc(mText)}</span></div>
+          <div class="or-ln">a sum of Rupees <span>${esc(wordsText)}</span></div>
+          ${r.receiptPhoto ? `<div class="orig-photo-box"><img src="${esc(r.receiptPhoto)}" alt="Attached Receipt Photo"></div>` : ''}
+          <div class="or-amt-row">
+            <div class="or-rs-box">Rs. ${fmt(r.amount)}</div>
+            <div class="or-sig">Accounts Division</div>
+          </div>
+          <div class="rbtn">
+            <button type="button" class="btn" onclick="downloadReceiptImg('${r.id}')">Download PNG</button>
+            <button type="button" class="btn ghost" onclick="shareReceiptImg('${r.id}')">Share PNG</button>
+            <button type="button" class="btn ghost" onclick="openReceiptModal('${r.id}')">Edit</button>
+            <button type="button" class="btn soft" onclick="doneReceipt()">Done</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    return `<div class="r-bar-wrap">
+      <div class="nr-wrap">
+        <div class="nr-top">
           <div class="nr-crest">JN<br>SEAL</div>
           <div class="nr-org-right">
             <div class="nr-inst">JAMIAH NALEEMIAH</div>
@@ -1095,11 +1176,8 @@ function renderReceiptsList(yrRecs) {
         <div class="nr-footer">
           <div class="nr-note">This is an official computer-generated receipt issued by Jamiah Naleemiah and requires no physical signature.</div>
           <div>P.O. Box 01, Beruwala, Sri Lanka. | Email: info@naleemiah.edu.lk | Web: naleemiah.edu.lk</div>
-        </div>`;
+        </div>
 
-    return `<div class="r-bar-wrap">
-      <div class="nr-wrap">
-        ${receiptBodyHtml}
         <div class="rbtn">
           <button type="button" class="btn" onclick="downloadReceiptImg('${r.id}')">Download PNG</button>
           <button type="button" class="btn ghost" onclick="shareReceiptImg('${r.id}')">Share PNG</button>
@@ -1183,6 +1261,7 @@ async function confirmPermanentDelete() {
     const { error } = await sb.from('fee_records').delete().eq('id', idToErase);
     if (error) throw error;
     removeFromBinLocal(idToErase);
+    unmarkNewDesign(idToErase);
     saveReceiptPhotoLocal(idToErase, '');
     await reloadData();
   } catch (e) {
@@ -1263,18 +1342,40 @@ function drawCrestEmblem(g, cx, cy, r) {
   g.restore();
 }
 
-function buildReceiptCanvasFromRecord(r, loadedImg) {
+function buildOldReceiptCanvas(r, loadedImg) {
   if (loadedImg) {
     const c = document.createElement('canvas');
     c.width = loadedImg.naturalWidth || loadedImg.width;
     c.height = loadedImg.naturalHeight || loadedImg.height;
     const g = c.getContext('2d');
-    g.imageSmoothingEnabled = true;
-    g.imageSmoothingQuality = 'high';
     g.drawImage(loadedImg, 0, 0, c.width, c.height);
     return c;
   }
+  const scale = 2.5, c = document.createElement('canvas');
+  c.width = 1100 * scale; c.height = 760 * scale;
+  const g = c.getContext('2d'); g.scale(scale, scale);
+  g.fillStyle = '#f8e3b8'; g.fillRect(0, 0, 1100, 760);
+  g.strokeStyle = '#111'; g.lineWidth = 4; g.strokeRect(20, 20, 1060, 720);
+  g.lineWidth = 2; g.strokeRect(32, 32, 1036, 696);
+  g.fillStyle = '#111'; g.textAlign = 'center';
+  g.font = 'bold 64px ' + SER; g.fillText('JAMIAH NALEEMIAH', 550, 125);
+  g.font = 'bold 42px ' + SER; g.fillText('OFFICIAL RECEIPT', 550, 182);
+  g.textAlign = 'left'; g.font = 'bold 34px ' + SER;
+  g.fillText('No. ' + (r.no || ''), 70, 260);
+  g.textAlign = 'right'; g.fillText('Date: ' + fd(r.date), 1030, 260);
+  g.textAlign = 'left';
+  g.fillText('Adm. No. ' + (r.adm || ''), 70, 320);
+  g.fillText('Class: ' + (r.cls || ''), 560, 320);
+  g.fillText('Received with thanks from: ' + (r.from || ''), 70, 390);
+  g.fillText('for the month / months: ' + formatMonthsLabel(r), 70, 455);
+  g.fillText('a sum of Rupees: ' + (r.words || wordsJS(r.amount)), 70, 520);
+  g.strokeRect(70, 585, 250, 62);
+  g.fillText('Rs. ' + fmt(r.amount), 92, 627);
+  g.textAlign = 'right'; g.font = 'italic bold 34px ' + SER; g.fillText('Accounts Division', 1030, 627);
+  return c;
+}
 
+function buildNewReceiptCanvas(r) {
   const scale = 3;
   const baseW = 1240;
   const baseH = 960;
@@ -1453,15 +1554,19 @@ function buildReceiptCanvasFromRecord(r, loadedImg) {
 }
 
 function renderReceiptCanvasAsync(r, cb) {
+  if (r.useNewDesign) {
+    cb(buildNewReceiptCanvas(r));
+    return;
+  }
   if (r.receiptPhoto) {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.onload = () => cb(buildReceiptCanvasFromRecord(r, img));
-    img.onerror = () => cb(buildReceiptCanvasFromRecord(r, null));
+    img.onload = () => cb(buildOldReceiptCanvas(r, img));
+    img.onerror = () => cb(buildOldReceiptCanvas(r, null));
     img.src = r.receiptPhoto;
     return;
   }
-  cb(buildReceiptCanvasFromRecord(r, null));
+  cb(buildOldReceiptCanvas(r, null));
 }
 
 function buildCardCanvas() {
@@ -1564,6 +1669,7 @@ function openReceiptModal(id, typeOverride) {
   if (id) {
     const r = S.allRecords.find(x => String(x.id) === String(id));
     editingId = r.id;
+    editingIsNewDesign = Boolean(r.useNewDesign);
     formPaymentType = r.isExtra ? 'extra' : (r.isAdmissionFee ? 'admission' : 'monthly');
     $('fTitle').textContent = formPaymentType === 'extra' ? 'Edit Extra Payment' : (formPaymentType === 'admission' ? 'Edit Admission Fee' : 'Edit Monthly Payment');
     $('fSaveBtn').textContent = 'Save Changes';
@@ -1577,8 +1683,10 @@ function openReceiptModal(id, typeOverride) {
     formReceiptPhoto = r.receiptPhoto || '';
     selectedMonths = (r.months || []).filter(m => m !== 'ADMISSION').slice();
     setAmtValue(r.amount, formPaymentType !== 'monthly');
+    $('photoAttachBlock').classList.toggle('hidden', editingIsNewDesign);
   } else {
     editingId = null;
+    editingIsNewDesign = true;
     formPaymentType = typeOverride || 'monthly';
     $('fTitle').textContent = formPaymentType === 'extra' ? 'Extra Payment' : (formPaymentType === 'admission' ? 'Admission Fee' : 'Monthly Payment');
     $('fSaveBtn').textContent = 'Create Receipt';
@@ -1592,6 +1700,7 @@ function openReceiptModal(id, typeOverride) {
     formReceiptPhoto = '';
     selectedMonths = [];
     setAmtValue(p.amount || '8000', formPaymentType !== 'monthly');
+    $('photoAttachBlock').classList.add('hidden');
   }
 
   syncReceiptPhotoPreview();
@@ -1692,7 +1801,11 @@ async function saveReceipt() {
       if (data && data.id) savedRowId = data.id;
     }
     if (savedRowId) {
-      saveReceiptPhotoLocal(savedRowId, formReceiptPhoto);
+      if (!editingId || editingIsNewDesign) {
+        markAsNewDesign(savedRowId);
+      } else {
+        saveReceiptPhotoLocal(savedRowId, formReceiptPhoto);
+      }
     }
     currentYear = effectiveAcadYear; expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
     persistPageState();
