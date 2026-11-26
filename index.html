@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Fee Tracker - Jamiah Naleemiah</title>
-<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Caveat:wght@600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
@@ -153,26 +153,34 @@ button,input,select{font:inherit;color:inherit}
 }
 .dots-del-btn:active{background:#ffe0dc}
 
-/* OLD RECEIPT DESIGN (FOR EXISTING / PREVIOUSLY REGISTERED RECEIPTS) */
-.old-rcpt{
-  background:#f8e3b8;border:3px double #111;padding:14px 12px 16px;
+/* OLD RECEIPT DESIGN (MATCHING 1000242833.jpg BOARDING FEE) */
+.bf-card{
+  background:#ffffff;border:1.5px solid #222;padding:16px 14px 18px;
   font-family:'Times New Roman',Georgia,serif;color:#111;margin-top:6px;margin-bottom:14px;
-  box-shadow:0 10px 26px rgba(0,0,0,.14);border-radius:4px
+  box-shadow:0 8px 22px rgba(0,0,0,.1);border-radius:2px
 }
-.old-rcpt .or-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-.old-rcpt .or-crest{
-  width:46px;height:46px;border-radius:50%;border:2px solid #111;
-  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;background:#fff5dc;flex-shrink:0
+.bf-head{text-align:center}
+.bf-inst{font-size:1.35rem;font-weight:700;letter-spacing:.3px;line-height:1.15;color:#111}
+.bf-po{font-size:.82rem;font-weight:700;letter-spacing:.4px;margin-top:2px;color:#111}
+.bf-pill-wrap{display:flex;justify-content:center;margin:8px 0 14px}
+.bf-pill{
+  background:#2d2a29;color:#ffffff;font-style:italic;font-weight:700;
+  font-size:.84rem;letter-spacing:1.1px;padding:4px 26px;border-radius:999px;
+  text-transform:uppercase
 }
-.old-rcpt .or-head{text-align:center;flex:1}
-.old-rcpt .or-t1{font-size:1.25rem;font-weight:700;letter-spacing:.3px}
-.old-rcpt .or-t2{font-size:.98rem;font-weight:700;margin-bottom:6px}
-.old-rcpt .or-row{display:flex;justify-content:space-between;font-weight:700;font-size:.88rem;margin:6px 0;gap:8px}
-.old-rcpt .or-ln{font-weight:700;font-size:.9rem;margin:7px 0;line-height:1.5}
-.old-rcpt .or-ln span{border-bottom:1px dotted #111;padding:0 6px}
-.old-rcpt .or-amt-row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px;flex-wrap:wrap}
-.old-rcpt .or-rs-box{border:2px solid #111;padding:4px 10px;font-weight:700;font-size:.92rem;background:#fff5dc}
-.old-rcpt .or-sig{font-style:italic;font-weight:700;font-size:.86rem}
+.bf-grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px 14px;margin:8px 0}
+.bf-field{display:flex;align-items:baseline;gap:6px;font-size:.92rem;color:#111;border-bottom:1.5px dotted #444;padding-bottom:2px;min-width:0}
+.bf-lbl{font-weight:400;white-space:nowrap;color:#111}
+.bf-val-hand{font-family:'Caveat',cursive;font-weight:700;font-size:1.18rem;color:#111;line-height:1.1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bf-line{display:flex;align-items:baseline;gap:6px;font-size:.92rem;color:#111;border-bottom:1.5px dotted #444;padding-bottom:2px;margin:10px 0;flex-wrap:wrap}
+.bf-line .bf-val-hand{white-space:normal}
+.bf-tail{margin-left:auto;font-weight:400;font-size:.9rem;white-space:nowrap}
+.bf-bot{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;margin-top:16px}
+.bf-rs-box{display:flex;align-items:baseline;gap:8px;border-bottom:1.5px dotted #444;padding-bottom:2px;min-width:135px}
+.bf-rs-lbl{font-size:1rem;color:#111}
+.bf-sign-col{text-align:center;flex:1;max-width:210px;margin-left:auto}
+.bf-sign-line{border-bottom:1.5px dotted #444;height:20px;margin-bottom:4px}
+.bf-sign-lbl{font-size:.88rem;color:#111}
 
 /* NEW PAYMENT RECEIPT DESIGN (ONLY FOR NEWLY CREATED RECEIPTS FROM NOW ON) */
 .nr-wrap{
@@ -246,13 +254,13 @@ button,input,select{font:inherit;color:inherit}
 .nr-footer .nr-note{font-style:italic;margin-bottom:3px}
 
 .orig-photo-box{
-  border:1px solid #111;border-radius:4px;overflow:hidden;background:#fff5dc;margin-top:8px
+  border:1px solid #222;border-radius:4px;overflow:hidden;background:#fafafa;margin-top:10px
 }
 .orig-photo-box img{
   width:100%;height:auto;display:block
 }
 
-.rbtn{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:13px;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+.rbtn{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:14px;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
 .rbtn .btn{padding:8px 4px;font-size:.76rem;border-radius:9px}
 
 .card{background:#f8e3b8;border:3px double #111;padding:14px 11px 16px;font-family:'Times New Roman',Georgia,serif;color:#111;margin-top:6px;box-shadow:0 10px 26px rgba(0,0,0,.14);border-radius:4px}
@@ -586,9 +594,6 @@ function markAsNewDesign(id) {
 }
 function unmarkNewDesign(id) {
   localStorage.setItem('ft_new_design_ids', JSON.stringify(getNewDesignIds().filter(x => x !== String(id))));
-}
-function isNewDesignRecord(r) {
-  return getNewDesignIds().includes(String(r.id));
 }
 
 function getReceiptPhotoMap() {
@@ -1069,34 +1074,53 @@ function renderReceiptsList(yrRecs) {
     const invCode = getInvoiceCode(r);
     const amtFmt = 'Rs. ' + fmt2(r.amount);
     const wordsText = r.words || wordsJS(r.amount);
+    const beingText = r.isExtra ? 'being extra payment.' : (r.isAdmissionFee ? 'being admission fee.' : 'being boarding fee.');
 
     if (!r.useNewDesign) {
       return `<div class="r-bar-wrap">
-        <div class="old-rcpt">
-          <div class="or-top">
-            <div class="or-crest">JN</div>
-            <div class="or-head">
-              <div class="or-t1">JAMIAH NALEEMIAH</div>
-              <div class="or-t2">OFFICIAL RECEIPT</div>
-            </div>
-            <div style="width:46px"></div>
+        <div class="bf-card">
+          <div class="bf-head">
+            <div class="bf-inst">JAMIAH NALEEMIAH</div>
+            <div class="bf-po">P.O.BOX 1, BERUWALA</div>
+            <div class="bf-pill-wrap"><span class="bf-pill">BOARDING FEE</span></div>
           </div>
-          <div class="or-row">
-            <div>No. <span>${esc(r.no)}</span></div>
-            <div>Date: <span>${fd(r.date)}</span></div>
+
+          <div class="bf-grid2">
+            <div class="bf-field"><span class="bf-lbl">No.</span><span class="bf-val-hand">${esc(r.no || '')}</span></div>
+            <div class="bf-field"><span class="bf-lbl">Date</span><span class="bf-val-hand">${fd(r.date)}</span></div>
+            <div class="bf-field"><span class="bf-lbl">Adm.No</span><span class="bf-val-hand">${esc(r.adm || '')}</span></div>
+            <div class="bf-field"><span class="bf-lbl">Class</span><span class="bf-val-hand">${esc(r.cls || '')}</span></div>
           </div>
-          <div class="or-row">
-            <div>Adm. No. <span>${esc(r.adm || '')}</span></div>
-            <div>Class: <span>${esc(r.cls || '')}</span></div>
+
+          <div class="bf-line">
+            <span class="bf-lbl">Received with thanks from</span>
+            <span class="bf-val-hand">${esc(r.from || '')}</span>
           </div>
-          <div class="or-ln">Received with thanks from <span>${esc(r.from || '')}</span></div>
-          <div class="or-ln">for the month / months <span>${esc(mText)}</span></div>
-          <div class="or-ln">a sum of Rupees <span>${esc(wordsText)}</span></div>
+
+          <div class="bf-line">
+            <span class="bf-lbl">a sum of Rupees</span>
+            <span class="bf-val-hand">${esc(wordsText)}</span>
+          </div>
+
+          <div class="bf-line">
+            <span class="bf-lbl">for the month / months</span>
+            <span class="bf-val-hand">${esc(mText)}</span>
+            <span class="bf-tail">${esc(beingText)}</span>
+          </div>
+
           ${r.receiptPhoto ? `<div class="orig-photo-box"><img src="${esc(r.receiptPhoto)}" alt="Attached Receipt Photo"></div>` : ''}
-          <div class="or-amt-row">
-            <div class="or-rs-box">Rs. ${fmt(r.amount)}</div>
-            <div class="or-sig">Accounts Division</div>
+
+          <div class="bf-bot">
+            <div class="bf-rs-box">
+              <span class="bf-rs-lbl">Rs.</span>
+              <span class="bf-val-hand">${fmt(r.amount)}</span>
+            </div>
+            <div class="bf-sign-col">
+              <div class="bf-sign-line"></div>
+              <div class="bf-sign-lbl">Head - Student administration</div>
+            </div>
           </div>
+
           <div class="rbtn">
             <button type="button" class="btn" onclick="downloadReceiptImg('${r.id}')">Download PNG</button>
             <button type="button" class="btn ghost" onclick="shareReceiptImg('${r.id}')">Share PNG</button>
@@ -1297,8 +1321,9 @@ function wordsJS(n) {
 
 const SER = '"Times New Roman", Georgia, serif';
 const SANS = '"Plus Jakarta Sans", system-ui, sans-serif';
+const HAND = '"Caveat", cursive';
 function rrect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
-function dotted(g, x1, x2, y, w) { g.save(); g.setLineDash([3, 6]); g.lineWidth = w || 2; g.strokeStyle = '#222'; g.beginPath(); g.moveTo(x1, y); g.lineTo(x2, y); g.stroke(); g.restore(); }
+function dotted(g, x1, x2, y, w) { g.save(); g.setLineDash([3, 6]); g.lineWidth = w || 2; g.strokeStyle = '#333'; g.beginPath(); g.moveTo(x1, y); g.lineTo(x2, y); g.stroke(); g.restore(); }
 
 function drawCircleTick(g, cx, cy, radius, bgColor, tickColor) {
   g.save();
@@ -1352,26 +1377,92 @@ function buildOldReceiptCanvas(r, loadedImg) {
     return c;
   }
   const scale = 2.5, c = document.createElement('canvas');
-  c.width = 1100 * scale; c.height = 760 * scale;
+  c.width = 1200 * scale; c.height = 760 * scale;
   const g = c.getContext('2d'); g.scale(scale, scale);
-  g.fillStyle = '#f8e3b8'; g.fillRect(0, 0, 1100, 760);
-  g.strokeStyle = '#111'; g.lineWidth = 4; g.strokeRect(20, 20, 1060, 720);
-  g.lineWidth = 2; g.strokeRect(32, 32, 1036, 696);
-  g.fillStyle = '#111'; g.textAlign = 'center';
-  g.font = 'bold 64px ' + SER; g.fillText('JAMIAH NALEEMIAH', 550, 125);
-  g.font = 'bold 42px ' + SER; g.fillText('OFFICIAL RECEIPT', 550, 182);
-  g.textAlign = 'left'; g.font = 'bold 34px ' + SER;
-  g.fillText('No. ' + (r.no || ''), 70, 260);
-  g.textAlign = 'right'; g.fillText('Date: ' + fd(r.date), 1030, 260);
+
+  g.fillStyle = '#ffffff';
+  g.fillRect(0, 0, 1200, 760);
+  g.strokeStyle = '#222222';
+  g.lineWidth = 3.5;
+  g.strokeRect(24, 24, 1152, 712);
+
+  g.fillStyle = '#111111';
+  g.textAlign = 'center';
+  g.font = 'bold 54px ' + SER;
+  g.fillText('JAMIAH NALEEMIAH', 600, 105);
+
+  g.font = 'bold 26px ' + SER;
+  g.fillText('P.O.BOX 1, BERUWALA', 600, 145);
+
+  g.fillStyle = '#2d2a29';
+  rrect(g, 435, 168, 330, 52, 26);
+  g.fill();
+  g.fillStyle = '#ffffff';
+  g.font = 'italic bold 26px ' + SER;
+  g.fillText('BOARDING FEE', 600, 203);
+
+  g.fillStyle = '#111111';
   g.textAlign = 'left';
-  g.fillText('Adm. No. ' + (r.adm || ''), 70, 320);
-  g.fillText('Class: ' + (r.cls || ''), 560, 320);
-  g.fillText('Received with thanks from: ' + (r.from || ''), 70, 390);
-  g.fillText('for the month / months: ' + formatMonthsLabel(r), 70, 455);
-  g.fillText('a sum of Rupees: ' + (r.words || wordsJS(r.amount)), 70, 520);
-  g.strokeRect(70, 585, 250, 62);
-  g.fillText('Rs. ' + fmt(r.amount), 92, 627);
-  g.textAlign = 'right'; g.font = 'italic bold 34px ' + SER; g.fillText('Accounts Division', 1030, 627);
+  g.font = '32px ' + SER;
+  g.fillText('No.', 72, 290);
+  dotted(g, 132, 560, 296, 2.5);
+  g.font = 'bold 38px ' + HAND;
+  g.fillText(String(r.no || ''), 145, 288);
+
+  g.font = '32px ' + SER;
+  g.fillText('Date', 625, 290);
+  dotted(g, 700, 1128, 296, 2.5);
+  g.font = 'bold 38px ' + HAND;
+  g.fillText(fd(r.date), 715, 288);
+
+  g.font = '32px ' + SER;
+  g.fillText('Adm.No', 72, 365);
+  dotted(g, 195, 560, 371, 2.5);
+  g.font = 'bold 38px ' + HAND;
+  g.fillText(String(r.adm || ''), 210, 363);
+
+  g.font = '32px ' + SER;
+  g.fillText('Class', 625, 365);
+  dotted(g, 715, 1128, 371, 2.5);
+  g.font = 'bold 38px ' + HAND;
+  g.fillText(String(r.cls || ''), 730, 363);
+
+  g.font = '32px ' + SER;
+  g.fillText('Received with thanks from', 72, 442);
+  dotted(g, 425, 1128, 448, 2.5);
+  g.font = 'bold 38px ' + HAND;
+  g.fillText(String(r.from || ''), 440, 440);
+
+  const wordsText = r.words || wordsJS(r.amount);
+  g.font = '32px ' + SER;
+  g.fillText('a sum of Rupees', 72, 518);
+  dotted(g, 295, 1128, 524, 2.5);
+  g.font = 'bold 36px ' + HAND;
+  g.fillText(wordsText, 310, 516);
+
+  const mText = formatMonthsLabel(r);
+  const beingText = r.isExtra ? 'being extra payment.' : (r.isAdmissionFee ? 'being admission fee.' : 'being boarding fee.');
+  g.font = '32px ' + SER;
+  g.fillText('for the month / months', 72, 594);
+  dotted(g, 385, 885, 600, 2.5);
+  g.font = 'bold 38px ' + HAND;
+  g.fillText(mText, 398, 592);
+  g.textAlign = 'right';
+  g.font = '30px ' + SER;
+  g.fillText(beingText, 1128, 594);
+
+  g.textAlign = 'left';
+  g.font = '34px ' + SER;
+  g.fillText('Rs.', 72, 682);
+  dotted(g, 130, 440, 688, 2.5);
+  g.font = 'bold 40px ' + HAND;
+  g.fillText(fmt(r.amount), 148, 680);
+
+  dotted(g, 765, 1128, 668, 2.5);
+  g.textAlign = 'center';
+  g.font = '30px ' + SER;
+  g.fillText('Head - Student administration', 946, 706);
+
   return c;
 }
 
