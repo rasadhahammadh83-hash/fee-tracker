@@ -139,73 +139,74 @@ button,input,select{font:inherit;color:inherit}
 
 /* NEW PAYMENT RECEIPT DESIGN (ONLY FOR NEWLY CREATED RECEIPTS FROM NOW ON) */
 .nr-wrap{
-  background:#ffffff;border:1px solid #d9e2ec;border-radius:12px;
+  background:#ffffff;border:1px solid #cbd5e1;border-radius:12px;
   box-shadow:0 10px 26px rgba(15,23,42,.1);padding:16px 14px 14px;
-  margin-top:6px;margin-bottom:14px;color:#1e293b;font-family:'Plus Jakarta Sans',sans-serif
+  margin-top:6px;margin-bottom:14px;color:#0f172a;font-family:'Plus Jakarta Sans',sans-serif
 }
-.nr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-bottom:12px;border-bottom:1px solid #e2e8f0}
-.nr-crest{
-  width:52px;height:52px;border-radius:50%;border:2.2px solid #0f172a;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  font-weight:800;font-size:.66rem;text-align:center;line-height:1.15;
-  background:#ffffff;color:#0f172a;flex-shrink:0;box-shadow:inset 0 0 0 2px #ffffff, inset 0 0 0 3.2px #0f172a
+.nr-top{display:flex;justify-content:space-between;align-items:center;gap:10px;padding-bottom:12px;border-bottom:1px solid #e2e8f0}
+.nr-logo-box{
+  width:56px;height:56px;border-radius:50%;border:2px solid #1e3a8a;
+  overflow:hidden;background:#ffffff;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 8px rgba(15,23,42,.08)
 }
+.nr-logo-img{width:100%;height:100%;object-fit:cover;display:block}
 .nr-org-right{text-align:right;flex:1;min-width:0}
-.nr-inst{font-size:.86rem;font-weight:800;letter-spacing:.5px;color:#0f172a}
-.nr-sub-line{font-size:.78rem;font-weight:600;color:#475569;margin-top:2px}
+.nr-inst{font-size:.88rem;font-weight:800;letter-spacing:.5px;color:#0f172a}
+.nr-sub-line{font-size:.78rem;font-weight:600;color:#1e3a8a;margin-top:2px}
 .nr-doc-title{font-size:.82rem;font-weight:800;letter-spacing:.8px;color:#0f9d76;margin-top:2px;text-transform:uppercase}
 
 .nr-meta-box{
   border:1px solid #cbd5e1;border-radius:8px;padding:10px 12px;margin-top:12px;
   display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;background:#ffffff
 }
-.nr-lbl{font-size:.63rem;font-weight:800;letter-spacing:.6px;color:#64748b;text-transform:uppercase}
+.nr-lbl{font-size:.63rem;font-weight:800;letter-spacing:.6px;color:#1e3a8a;text-transform:uppercase}
 .nr-val{font-size:.8rem;font-weight:700;color:#0f172a;margin-top:2px;word-break:break-word}
 .nr-paid-pill{
-  display:inline-flex;align-items:center;gap:5px;background:#dcfce7;color:#15803d;
-  border:1px solid #86efac;border-radius:999px;padding:2px 8px;font-size:.7rem;font-weight:800;margin-top:3px
+  display:inline-flex;align-items:center;gap:6px;background:#dcfce7;color:#15803d;
+  border:1px solid #86efac;border-radius:999px;padding:2px 9px 2px 4px;font-size:.7rem;font-weight:800;margin-top:3px
 }
-.nr-circle-tick{
-  width:15px;height:15px;border-radius:50%;background:#16a34a;color:#ffffff;
-  display:inline-flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:900;line-height:1;flex-shrink:0
+.nr-green-check{
+  width:16px;height:16px;border-radius:50%;background:#16a34a;color:#ffffff;
+  display:inline-flex;align-items:center;justify-content:center;font-size:.66rem;font-weight:900;line-height:1;flex-shrink:0
 }
 
 .nr-sec-title{
-  font-size:.68rem;font-weight:800;letter-spacing:.7px;color:#475569;
+  font-size:.68rem;font-weight:800;letter-spacing:.7px;color:#1e3a8a;
   text-transform:uppercase;margin:14px 0 6px
 }
 .nr-bd-box{border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
 .nr-bd-head{
   display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;
   background:#f1f5f9;padding:7px 10px;font-size:.63rem;font-weight:800;
-  color:#475569;text-transform:uppercase;letter-spacing:.4px
+  color:#1e3a8a;text-transform:uppercase;letter-spacing:.4px
 }
 .nr-bd-row{
   display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;align-items:center;
   padding:9px 10px;font-size:.76rem;border-top:1px solid #e2e8f0;background:#fff
 }
 .nr-inv-code{font-weight:800;color:#0f172a;font-size:.74rem}
-.nr-inv-month{color:#475569;font-size:.71rem;margin-top:1px}
+.nr-inv-month{color:#334155;font-size:.71rem;margin-top:1px}
 .nr-amt-cell{font-weight:700;color:#0f172a;text-align:right}
-.nr-arr-cell{font-weight:700;color:#15803d;text-align:right;font-size:.72rem;display:inline-flex;align-items:center;justify-content:flex-end;gap:4px}
+.nr-arr-cell{font-weight:700;color:#15803d;text-align:right;font-size:.72rem;display:inline-flex;align-items:center;justify-content:flex-end;gap:5px}
 
 .nr-total-row{display:flex;justify-content:flex-end;margin-top:10px}
 .nr-total-box{
   border:1.5px solid #94a3b8;border-radius:8px;padding:7px 12px;
   background:#f8fafc;display:flex;align-items:center;gap:10px
 }
-.nr-total-lbl{font-size:.68rem;font-weight:800;color:#334155;letter-spacing:.4px}
+.nr-total-lbl{font-size:.68rem;font-weight:800;color:#1e3a8a;letter-spacing:.4px}
 .nr-total-val{font-size:.88rem;font-weight:800;color:#0f172a}
 
 .nr-seal-wrap{display:flex;justify-content:flex-end;margin-top:12px}
 .nr-seal{
   border:1.5px dashed #64748b;border-radius:6px;padding:6px 10px;
-  text-align:center;color:#334155;font-size:.62rem;font-weight:800;line-height:1.25;
+  text-align:center;color:#1e3a8a;font-size:.62rem;font-weight:800;line-height:1.25;
   min-width:86px;transform:rotate(-8deg);background:#ffffff
 }
 .nr-footer{
   margin-top:14px;padding-top:10px;border-top:1px solid #e2e8f0;
-  text-align:center;color:#64748b;font-size:.68rem
+  text-align:center;color:#475569;font-size:.68rem
 }
 .nr-footer .nr-note{font-style:italic;margin-bottom:3px}
 
@@ -465,11 +466,10 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
 <div id="busy" class="hidden">Processing...</div>
 
 <script>
-// ===== PASTE YOUR NEW SUPABASE PROJECT KEYS HERE =====
 const SUPABASE_URL = 'https://tebjfmwyjeuludbviidl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_dYiWPaE1Ao8WbtZafS9ODg_7JFMKmof';
 const DEFAULT_PIN = '2246';
-// ===================================================
+const RECEIPT_LOGO_URL = 'https://i.ibb.co/hJgjZvxW/file-000000004c8482118559fcfa4102544e.png';
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -927,7 +927,9 @@ function renderReceiptsList(yrRecs) {
     return `<div class="r-bar-wrap">
       <div class="nr-wrap">
         <div class="nr-top">
-          <div class="nr-crest"><span>JN</span><span>SEAL</span></div>
+          <div class="nr-logo-box">
+            <img class="nr-logo-img" src="${RECEIPT_LOGO_URL}" alt="Jamiah Naleemiah Logo">
+          </div>
           <div class="nr-org-right">
             <div class="nr-inst">JAMIAH NALEEMIAH</div>
             <div class="nr-sub-line">${esc(headerSub)}</div>
@@ -950,7 +952,7 @@ function renderReceiptsList(yrRecs) {
           </div>
           <div>
             <div class="nr-lbl">STATUS</div>
-            <div class="nr-paid-pill"><span class="nr-circle-tick">✓</span><span>PAID</span></div>
+            <div class="nr-paid-pill"><span class="nr-green-check">✓</span><span>PAID</span></div>
           </div>
           <div>
             <div class="nr-lbl">PAYMENT METHOD</div>
@@ -975,7 +977,7 @@ function renderReceiptsList(yrRecs) {
               <div class="nr-inv-month">${esc(mText)}</div>
             </div>
             <div class="nr-amt-cell">${esc(amtFmt)}</div>
-            <div class="nr-arr-cell"><span class="nr-circle-tick" style="width:13px;height:13px;font-size:.55rem">✓</span><span>Rs. 0.00</span></div>
+            <div class="nr-arr-cell"><span class="nr-green-check" style="width:14px;height:14px;font-size:.58rem">✓</span><span>Rs. 0.00</span></div>
           </div>
         </div>
 
@@ -1120,14 +1122,14 @@ function drawField(g, lab, val, x, y, x2) {
   g.fillText(val, sx + 7, y - 3);
 }
 
-function drawCircleTick(g, cx, cy, radius, bgColor, tickColor) {
+function drawWhiteCheckInGreenCircle(g, cx, cy, radius) {
   g.save();
   g.beginPath();
   g.arc(cx, cy, radius, 0, Math.PI * 2);
-  g.fillStyle = bgColor;
+  g.fillStyle = '#16a34a';
   g.fill();
-  g.strokeStyle = tickColor;
-  g.lineWidth = Math.max(2.2, radius * 0.24);
+  g.strokeStyle = '#ffffff';
+  g.lineWidth = Math.max(2.4, radius * 0.25);
   g.lineCap = 'round';
   g.lineJoin = 'round';
   g.beginPath();
@@ -1138,27 +1140,24 @@ function drawCircleTick(g, cx, cy, radius, bgColor, tickColor) {
   g.restore();
 }
 
-function drawCrestEmblem(g, cx, cy, r) {
+function drawReceiptLogoOnCanvas(g, cx, cy, r, logoImg) {
   g.save();
-  g.strokeStyle = '#0f172a';
-  g.lineWidth = 3.2;
-  g.fillStyle = '#ffffff';
   g.beginPath();
   g.arc(cx, cy, r, 0, Math.PI * 2);
-  g.fill();
-  g.stroke();
+  g.clip();
+  g.fillStyle = '#ffffff';
+  g.fillRect(cx - r, cy - r, r * 2, r * 2);
+  if (logoImg) {
+    g.drawImage(logoImg, cx - r, cy - r, r * 2, r * 2);
+  }
+  g.restore();
 
-  g.lineWidth = 1.6;
+  g.save();
+  g.strokeStyle = '#1e3a8a';
+  g.lineWidth = 3;
   g.beginPath();
-  g.arc(cx, cy, r - 6, 0, Math.PI * 2);
+  g.arc(cx, cy, r, 0, Math.PI * 2);
   g.stroke();
-
-  g.fillStyle = '#0f172a';
-  g.font = '800 17px ' + SANS;
-  g.textAlign = 'center';
-  g.fillText('JN', cx, cy - 2);
-  g.font = '700 10px ' + SANS;
-  g.fillText('SEAL', cx, cy + 14);
   g.restore();
 }
 
@@ -1186,7 +1185,7 @@ function buildOldReceiptCanvas(r) {
   return c;
 }
 
-function buildNewReceiptCanvas(r) {
+function buildNewReceiptCanvasWithLogo(r, logoImg) {
   const scale = 3, baseW = 1240, baseH = 960;
   const c = document.createElement('canvas');
   c.width = baseW * scale; c.height = baseH * scale;
@@ -1205,14 +1204,14 @@ function buildNewReceiptCanvas(r) {
   g.fillStyle = '#ffffff';
   g.fillRect(0, 0, baseW, baseH);
 
-  drawCrestEmblem(g, 114, 96, 46);
+  drawReceiptLogoOnCanvas(g, 116, 96, 48, logoImg);
 
   g.textAlign = 'right';
   g.fillStyle = '#0f172a';
   g.font = '800 29px ' + SANS;
   g.fillText('JAMIAH NALEEMIAH', 1170, 74);
 
-  g.fillStyle = '#475569';
+  g.fillStyle = '#1e3a8a';
   g.font = '600 22px ' + SANS;
   g.fillText(headerSub, 1170, 106);
 
@@ -1237,30 +1236,30 @@ function buildNewReceiptCanvas(r) {
   const col1X = 100, col2X = 635, rowYs = [222, 298, 374];
 
   g.textAlign = 'left';
-  g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('RECEIPT NO', col1X, rowYs[0]);
+  g.fillStyle = '#1e3a8a'; g.font = '800 15px ' + SANS; g.fillText('RECEIPT NO', col1X, rowYs[0]);
   g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText(String(r.no || ''), col1X, rowYs[0] + 28);
 
-  g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('STUDENT DETAILS', col2X, rowYs[0]);
+  g.fillStyle = '#1e3a8a'; g.font = '800 15px ' + SANS; g.fillText('STUDENT DETAILS', col2X, rowYs[0]);
   g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText(studentDisp, col2X, rowYs[0] + 28);
 
-  g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('PAYMENT DATE', col1X, rowYs[1]);
+  g.fillStyle = '#1e3a8a'; g.font = '800 15px ' + SANS; g.fillText('PAYMENT DATE', col1X, rowYs[1]);
   g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText(dateDisp, col1X, rowYs[1] + 28);
 
-  g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('STATUS', col2X, rowYs[1]);
+  g.fillStyle = '#1e3a8a'; g.font = '800 15px ' + SANS; g.fillText('STATUS', col2X, rowYs[1]);
   g.fillStyle = '#dcfce7';
-  rrect(g, col2X, rowYs[1] + 8, 118, 34, 17);
+  rrect(g, col2X, rowYs[1] + 8, 122, 34, 17);
   g.fill();
   g.strokeStyle = '#86efac'; g.lineWidth = 1.8; g.stroke();
-  drawCircleTick(g, col2X + 20, rowYs[1] + 25, 10, '#16a34a', '#ffffff');
-  g.fillStyle = '#15803d'; g.font = '800 17px ' + SANS; g.fillText('PAID', col2X + 37, rowYs[1] + 31);
+  drawWhiteCheckInGreenCircle(g, col2X + 21, rowYs[1] + 25, 10.5);
+  g.fillStyle = '#15803d'; g.font = '800 17px ' + SANS; g.fillText('PAID', col2X + 39, rowYs[1] + 31);
 
-  g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('PAYMENT METHOD', col1X, rowYs[2]);
+  g.fillStyle = '#1e3a8a'; g.font = '800 15px ' + SANS; g.fillText('PAYMENT METHOD', col1X, rowYs[2]);
   g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText('Bank Deposit', col1X, rowYs[2] + 28);
 
-  g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('ISSUED BY', col2X, rowYs[2]);
+  g.fillStyle = '#1e3a8a'; g.font = '800 15px ' + SANS; g.fillText('ISSUED BY', col2X, rowYs[2]);
   g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText('Accounts Division', col2X, rowYs[2] + 28);
 
-  g.fillStyle = '#475569';
+  g.fillStyle = '#1e3a8a';
   g.font = '800 17px ' + SANS;
   g.fillText('PAYMENT BREAKDOWN', 70, 458);
 
@@ -1273,7 +1272,7 @@ function buildNewReceiptCanvas(r) {
   rrect(g, 71, 475, 1098, 44, 9);
   g.fill();
 
-  g.fillStyle = '#475569';
+  g.fillStyle = '#1e3a8a';
   g.font = '800 15px ' + SANS;
   g.textAlign = 'left';
   g.fillText('INVOICE/MONTH', 94, 503);
@@ -1291,7 +1290,7 @@ function buildNewReceiptCanvas(r) {
   g.fillStyle = '#0f172a';
   g.font = '800 20px ' + SANS;
   g.fillText(invCode, 94, 552);
-  g.fillStyle = '#475569';
+  g.fillStyle = '#334155';
   g.font = '600 19px ' + SANS;
   g.fillText(mText, 94, 580);
 
@@ -1300,7 +1299,7 @@ function buildNewReceiptCanvas(r) {
   g.font = '700 21px ' + SANS;
   g.fillText(amtFmt, 840, 560);
 
-  drawCircleTick(g, 1022, 554, 9, '#16a34a', '#ffffff');
+  drawWhiteCheckInGreenCircle(g, 1022, 554, 9.5);
   g.fillStyle = '#15803d';
   g.font = '700 20px ' + SANS;
   g.fillText('Rs. 0.00', 1146, 561);
@@ -1313,7 +1312,7 @@ function buildNewReceiptCanvas(r) {
   g.stroke();
 
   g.textAlign = 'left';
-  g.fillStyle = '#334155';
+  g.fillStyle = '#1e3a8a';
   g.font = '800 17px ' + SANS;
   g.fillText('TOTAL RECEIVED', 754, 658);
 
@@ -1331,7 +1330,7 @@ function buildNewReceiptCanvas(r) {
   rrect(g, -90, -38, 180, 76, 8);
   g.stroke();
   g.setLineDash([]);
-  g.fillStyle = '#475569';
+  g.fillStyle = '#1e3a8a';
   g.fillRect(-16, -28, 32, 6);
   g.fillRect(-6, -22, 12, 8);
   g.fillRect(-20, -14, 40, 4);
@@ -1349,7 +1348,7 @@ function buildNewReceiptCanvas(r) {
   g.stroke();
 
   g.textAlign = 'center';
-  g.fillStyle = '#64748b';
+  g.fillStyle = '#475569';
   g.font = 'italic 18px ' + SANS;
   g.fillText('This is an official computer-generated receipt issued by Jamiah Naleemiah and requires no physical signature.', 620, 856);
 
@@ -1359,8 +1358,16 @@ function buildNewReceiptCanvas(r) {
   return c;
 }
 
-function buildReceiptCanvas(r) {
-  return r.useNewDesign ? buildNewReceiptCanvas(r) : buildOldReceiptCanvas(r);
+function renderReceiptCanvasAsync(r, callback) {
+  if (!r.useNewDesign) {
+    callback(buildOldReceiptCanvas(r));
+    return;
+  }
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => callback(buildNewReceiptCanvasWithLogo(r, img));
+  img.onerror = () => callback(buildNewReceiptCanvasWithLogo(r, null));
+  img.src = RECEIPT_LOGO_URL;
 }
 
 function buildCardCanvas() {
@@ -1386,8 +1393,14 @@ function triggerDownload(canvas, filename) { const a = document.createElement('a
 async function triggerShare(canvas, filename, titleText) {
   canvas.toBlob(async blob => { const file = new File([blob], filename, { type: 'image/png' }); if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: titleText }); return; } catch (e) {} } triggerDownload(canvas, filename); }, 'image/png');
 }
-function downloadReceiptImg(id) { const r = S.allRecords.find(x => String(x.id) === String(id)); if (r) triggerDownload(buildReceiptCanvas(r), `Receipt_${r.no}.png`); }
-function shareReceiptImg(id) { const r = S.allRecords.find(x => String(x.id) === String(id)); if (r) triggerShare(buildReceiptCanvas(r), `Receipt_${r.no}.png`, `Payment Receipt #${r.no}`); }
+function downloadReceiptImg(id) {
+  const r = S.allRecords.find(x => String(x.id) === String(id));
+  if (r) renderReceiptCanvasAsync(r, canvas => triggerDownload(canvas, `Receipt_${r.no}.png`));
+}
+function shareReceiptImg(id) {
+  const r = S.allRecords.find(x => String(x.id) === String(id));
+  if (r) renderReceiptCanvasAsync(r, canvas => triggerShare(canvas, `Receipt_${r.no}.png`, `Payment Receipt #${r.no}`));
+}
 function downloadCardImg() { triggerDownload(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.png`); }
 function shareCardImg() { triggerShare(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.png`, `Hostel Fee Card - ${currentYear}`); }
 
