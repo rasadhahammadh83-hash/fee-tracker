@@ -153,7 +153,7 @@ button,input,select{font:inherit;color:inherit}
 }
 .dots-del-btn:active{background:#ffe0dc}
 
-/* NEW PAYMENT RECEIPT CARD DESIGN */
+/* NALEEMIAH PAYMENT RECEIPT CARD DESIGN */
 .nr-wrap{
   background:#ffffff;border:1px solid #d9e2ec;border-radius:12px;
   box-shadow:0 10px 26px rgba(15,23,42,.1);padding:16px 14px 14px;
@@ -224,6 +224,13 @@ button,input,select{font:inherit;color:inherit}
 }
 .nr-footer .nr-note{font-style:italic;margin-bottom:3px}
 
+.orig-photo-box{
+  border:1px solid #cbd5e1;border-radius:10px;overflow:hidden;background:#f8fafc;
+}
+.orig-photo-box img{
+  width:100%;height:auto;display:block;
+}
+
 .rbtn{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:13px;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
 .rbtn .btn{padding:8px 4px;font-size:.76rem;border-radius:9px}
 
@@ -266,6 +273,15 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
 .month-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:8px;background:#fff;padding:9px;border-radius:11px;border:1.5px solid var(--brand);box-shadow:0 8px 20px rgba(0,0,0,.1)}
 .mg-btn{padding:8px 4px;border:1px solid var(--line);border-radius:8px;background:#fff;font-size:.82rem;font-weight:600;cursor:pointer}
 .mg-btn.sel{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+.rec-img-attach{
+  border:1.5px dashed var(--brand);background:#f7fbfa;border-radius:12px;
+  padding:10px 12px;margin-top:6px;text-align:center
+}
+.rec-img-prev{
+  max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;
+  border:1px solid var(--line);display:block;margin-left:auto;margin-right:auto
+}
 
 /* BIN VIEW */
 .bin-header{background:#fff;border:1px solid var(--line);border-left:5px solid var(--miss);border-radius:14px;padding:14px 16px;margin-bottom:12px}
@@ -388,7 +404,7 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
   <div class="sheet">
     <h2 id="fTitle" style="margin:0 0 8px;color:var(--brand)">Monthly Payment</h2>
     <div class="two">
-      <div><label for="fNo">No.</label><input id="fNo" class="f" type="text" placeholder="e.g. MF - 00827"></div>
+      <div><label for="fNo">No.</label><input id="fNo" class="f" type="text" placeholder="e.g. MF-00827"></div>
       <div><label for="fDate">Date (Tap to change)</label><input id="fDate" class="f" type="date"></div>
     </div>
     <div class="two">
@@ -430,6 +446,18 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
         <label>a sum of Rupees (Auto)</label>
         <input id="fWordsPreview" class="f" type="text" readonly>
       </div>
+    </div>
+
+    <!-- OPTIONAL ORIGINAL RECEIPT PHOTO / SCREENSHOT -->
+    <label>Original Receipt Photo / Screenshot (Optional)</label>
+    <div class="rec-img-attach">
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <label class="btn sm ghost" style="cursor:pointer;margin:0">
+          Attach Receipt Photo <input type="file" accept="image/*" class="hidden" onchange="handleReceiptPhotoUpload(this)">
+        </label>
+        <button type="button" class="btn sm soft" id="btnClearRecPhoto" onclick="clearReceiptPhoto()">Remove Photo</button>
+      </div>
+      <img id="recPhotoPreview" class="rec-img-prev hidden" src="" alt="Receipt Photo">
     </div>
 
     <div class="err" id="fErr" style="margin-top:10px"></div>
@@ -479,7 +507,7 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
     <label for="pName">Student Full Name (For Receipt)</label>
     <input id="pName" class="f" type="text" placeholder="Enter your full name">
     <div class="two">
-      <div><label for="pAdm">Adm.No</label><input id="pAdm" class="f" type="text" placeholder="e.g. 2022/123"></div>
+      <div><label for="pAdm">Adm.No</label><input id="pAdm" class="f" type="text" placeholder="e.g. 2246"></div>
       <div><label for="pCls">Current Year / Class</label><select id="pCls" class="f"></select></div>
     </div>
     <div class="two">
@@ -497,11 +525,9 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
 <div id="busy" class="hidden">Processing...</div>
 
 <script>
-// ===== PASTE YOUR NEW SUPABASE PROJECT KEYS HERE =====
 const SUPABASE_URL = 'https://tebjfmwyjeuludbviidl.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_dYiWPaE1Ao8WbtZafS9ODg_7JFMKmof';
 const DEFAULT_PIN = '2246';
-// ===================================================
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const MON = ['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -510,7 +536,7 @@ const YEARS = ['1st year','2nd year','3rd year','4th year','5th year','6th year'
 const DEFAULT_AVATAR = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23e2f0f3'/><circle cx='50' cy='38' r='18' fill='%230d4c5c'/><path d='M20 88c0-17 13-28 30-28s30 11 30 28' fill='%230d4c5c'/></svg>";
 
 let S = null, currentYear = '1st year', activeTab = 'rec', viewMode = 'dashboard';
-let selectedMonths = [], editingId = null, uploadedPhotoB64 = undefined;
+let selectedMonths = [], editingId = null, uploadedPhotoB64 = undefined, formReceiptPhoto = '';
 let formPaymentType = 'monthly';
 let expandedReceiptId = null, promptReceiptId = null, openDotsId = null;
 let pendingDeleteId = null, pendingPermDeleteId = null;
@@ -523,6 +549,21 @@ const fmt2 = n => Number(n || 0).toLocaleString('en-US', {minimumFractionDigits:
 const fd = iso => iso ? iso.split('-').reverse().join('/') : '';
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const busy = b => $('busy').classList.toggle('hidden', !b);
+
+function getReceiptPhotoMap() {
+  try { return JSON.parse(localStorage.getItem('ft_rec_photos') || '{}'); } catch (e) { return {}; }
+}
+function saveReceiptPhotoLocal(id, dataUrl) {
+  if (!id) return;
+  const map = getReceiptPhotoMap();
+  if (dataUrl) map[String(id)] = dataUrl;
+  else delete map[String(id)];
+  try { localStorage.setItem('ft_rec_photos', JSON.stringify(map)); } catch (e) {}
+}
+function getReceiptPhotoLocal(id) {
+  const map = getReceiptPhotoMap();
+  return map[String(id)] || '';
+}
 
 function formatReceiptDateTime(iso) {
   if (!iso) return '';
@@ -749,6 +790,7 @@ async function fetchAllFromSupabase() {
     const isExtra = rawList.startsWith('EXTRA:');
     const extraDesc = isExtra ? rawList.slice(6) : '';
     const mArr = isExtra ? [] : (r.months_list ? String(r.months_list).split(',').filter(Boolean) : [r.fee_month]);
+    const localPhoto = getReceiptPhotoLocal(r.id);
     return {
       id: r.id,
       acadYear: r.acad_year || r.class_name || '1st year',
@@ -764,6 +806,7 @@ async function fetchAllFromSupabase() {
       cls: r.class_name,
       from: r.received_from,
       words: r.amount_words,
+      receiptPhoto: localPhoto || r.receipt_photo || '',
       isDeleted: binIds.includes(String(r.id))
     };
   });
@@ -983,9 +1026,9 @@ function renderReceiptsList(yrRecs) {
     const invCode = getInvoiceCode(r);
     const amtFmt = 'Rs. ' + fmt2(r.amount);
 
-    return `<div class="r-bar-wrap">
-      <div class="nr-wrap">
-        <div class="nr-top">
+    const receiptBodyHtml = r.receiptPhoto
+      ? `<div class="orig-photo-box"><img src="${esc(r.receiptPhoto)}" alt="Original Receipt"></div>`
+      : `<div class="nr-top">
           <div class="nr-crest">JN<br>SEAL</div>
           <div class="nr-org-right">
             <div class="nr-inst">JAMIAH NALEEMIAH</div>
@@ -1024,7 +1067,7 @@ function renderReceiptsList(yrRecs) {
         <div class="nr-sec-title">PAYMENT BREAKDOWN</div>
         <div class="nr-bd-box">
           <div class="nr-bd-head">
-            <div>INVOICE / MONTH</div>
+            <div>INVOICE/MONTH</div>
             <div style="text-align:right">AMOUNT PAID</div>
             <div style="text-align:right">ARREARS BALANCE</div>
           </div>
@@ -1052,8 +1095,11 @@ function renderReceiptsList(yrRecs) {
         <div class="nr-footer">
           <div class="nr-note">This is an official computer-generated receipt issued by Jamiah Naleemiah and requires no physical signature.</div>
           <div>P.O. Box 01, Beruwala, Sri Lanka. | Email: info@naleemiah.edu.lk | Web: naleemiah.edu.lk</div>
-        </div>
+        </div>`;
 
+    return `<div class="r-bar-wrap">
+      <div class="nr-wrap">
+        ${receiptBodyHtml}
         <div class="rbtn">
           <button type="button" class="btn" onclick="downloadReceiptImg('${r.id}')">Download PNG</button>
           <button type="button" class="btn ghost" onclick="shareReceiptImg('${r.id}')">Share PNG</button>
@@ -1137,6 +1183,7 @@ async function confirmPermanentDelete() {
     const { error } = await sb.from('fee_records').delete().eq('id', idToErase);
     if (error) throw error;
     removeFromBinLocal(idToErase);
+    saveReceiptPhotoLocal(idToErase, '');
     await reloadData();
   } catch (e) {
     alert(e.message || 'Permanent delete failed');
@@ -1207,7 +1254,6 @@ function drawCrestEmblem(g, cx, cy, r) {
   g.arc(cx, cy, r - 6, 0, Math.PI * 2);
   g.stroke();
 
-  // Inner emblem motif + JN text
   g.fillStyle = '#0f172a';
   g.font = '800 18px ' + SANS;
   g.textAlign = 'center';
@@ -1217,8 +1263,18 @@ function drawCrestEmblem(g, cx, cy, r) {
   g.restore();
 }
 
-/* ULTRA-SHARP 3X PNG RECEIPT CANVAS RENDERER FOR CRYSTAL-CLEAR ZOOM */
-function buildReceiptCanvas(r) {
+function buildReceiptCanvasFromRecord(r, loadedImg) {
+  if (loadedImg) {
+    const c = document.createElement('canvas');
+    c.width = loadedImg.naturalWidth || loadedImg.width;
+    c.height = loadedImg.naturalHeight || loadedImg.height;
+    const g = c.getContext('2d');
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = 'high';
+    g.drawImage(loadedImg, 0, 0, c.width, c.height);
+    return c;
+  }
+
   const scale = 3;
   const baseW = 1240;
   const baseH = 960;
@@ -1240,10 +1296,8 @@ function buildReceiptCanvas(r) {
   g.fillStyle = '#ffffff';
   g.fillRect(0, 0, baseW, baseH);
 
-  // Top Header Left Crest Logo
   drawCrestEmblem(g, 114, 96, 46);
 
-  // Top Header Right Organization & Fee Month
   g.textAlign = 'right';
   g.fillStyle = '#0f172a';
   g.font = '800 29px ' + SANS;
@@ -1257,7 +1311,6 @@ function buildReceiptCanvas(r) {
   g.font = '800 23px ' + SANS;
   g.fillText('PAYMENT RECEIPT', 1170, 136);
 
-  // Divider line under top header
   g.strokeStyle = '#e2e8f0';
   g.lineWidth = 2;
   g.beginPath();
@@ -1265,7 +1318,6 @@ function buildReceiptCanvas(r) {
   g.lineTo(1170, 162);
   g.stroke();
 
-  // Metadata Box (2 columns x 3 rows)
   g.strokeStyle = '#cbd5e1';
   g.lineWidth = 2;
   g.fillStyle = '#ffffff';
@@ -1287,7 +1339,6 @@ function buildReceiptCanvas(r) {
   g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('PAYMENT DATE', col1X, rowYs[1]);
   g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText(dateDisp, col1X, rowYs[1] + 28);
 
-  // STATUS badge with round green checkmark icon
   g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('STATUS', col2X, rowYs[1]);
   g.fillStyle = '#dcfce7';
   rrect(g, col2X, rowYs[1] + 8, 118, 34, 17);
@@ -1302,7 +1353,6 @@ function buildReceiptCanvas(r) {
   g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('ISSUED BY', col2X, rowYs[2]);
   g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText('Accounts Division', col2X, rowYs[2] + 28);
 
-  // PAYMENT BREAKDOWN Section
   g.fillStyle = '#475569';
   g.font = '800 17px ' + SANS;
   g.fillText('PAYMENT BREAKDOWN', 70, 458);
@@ -1319,7 +1369,7 @@ function buildReceiptCanvas(r) {
   g.fillStyle = '#475569';
   g.font = '800 15px ' + SANS;
   g.textAlign = 'left';
-  g.fillText('INVOICE / MONTH', 94, 503);
+  g.fillText('INVOICE/MONTH', 94, 503);
   g.textAlign = 'right';
   g.fillText('AMOUNT PAID', 840, 503);
   g.fillText('ARREARS BALANCE', 1146, 503);
@@ -1348,7 +1398,6 @@ function buildReceiptCanvas(r) {
   g.font = '700 20px ' + SANS;
   g.fillText('Rs. 0.00', 1146, 561);
 
-  // TOTAL RECEIVED Box
   g.fillStyle = '#f8fafc';
   g.strokeStyle = '#94a3b8';
   g.lineWidth = 2;
@@ -1366,7 +1415,6 @@ function buildReceiptCanvas(r) {
   g.font = '800 24px ' + SANS;
   g.fillText(amtFmt, 1148, 659);
 
-  // Tilted OFFICIAL SEAL box with stamp motif on bottom right
   g.save();
   g.translate(1078, 742);
   g.rotate(-0.14);
@@ -1386,7 +1434,6 @@ function buildReceiptCanvas(r) {
   g.fillText('SEAL', 0, 28);
   g.restore();
 
-  // Footer
   g.strokeStyle = '#e2e8f0';
   g.lineWidth = 2;
   g.beginPath();
@@ -1403,6 +1450,18 @@ function buildReceiptCanvas(r) {
   g.fillText('P.O. Box 01, Beruwala, Sri Lanka. | Email: info@naleemiah.edu.lk | Web: naleemiah.edu.lk', 620, 892);
 
   return c;
+}
+
+function renderReceiptCanvasAsync(r, cb) {
+  if (r.receiptPhoto) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => cb(buildReceiptCanvasFromRecord(r, img));
+    img.onerror = () => cb(buildReceiptCanvasFromRecord(r, null));
+    img.src = r.receiptPhoto;
+    return;
+  }
+  cb(buildReceiptCanvasFromRecord(r, null));
 }
 
 function buildCardCanvas() {
@@ -1450,17 +1509,51 @@ async function triggerSharePng(canvas, filename, titleText) {
 
 function downloadReceiptImg(id) {
   const r = S.allRecords.find(x => String(x.id) === String(id));
-  if (r) triggerDownloadPng(buildReceiptCanvas(r), `Receipt_${String(r.no || '').replace(/\s+/g,'_')}.png`);
+  if (r) {
+    renderReceiptCanvasAsync(r, canvas => {
+      triggerDownloadPng(canvas, `Receipt_${String(r.no || '').replace(/\s+/g,'_')}.png`);
+    });
+  }
 }
 function shareReceiptImg(id) {
   const r = S.allRecords.find(x => String(x.id) === String(id));
-  if (r) triggerSharePng(buildReceiptCanvas(r), `Receipt_${String(r.no || '').replace(/\s+/g,'_')}.png`, `Payment Receipt #${r.no}`);
+  if (r) {
+    renderReceiptCanvasAsync(r, canvas => {
+      triggerSharePng(canvas, `Receipt_${String(r.no || '').replace(/\s+/g,'_')}.png`, `Payment Receipt #${r.no}`);
+    });
+  }
 }
 function downloadCardImg() {
   triggerDownloadPng(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.png`);
 }
 function shareCardImg() {
   triggerSharePng(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.png`, `Hostel Fee Card - ${currentYear}`);
+}
+
+function syncReceiptPhotoPreview() {
+  const img = $('recPhotoPreview');
+  if (formReceiptPhoto) {
+    img.src = formReceiptPhoto;
+    img.classList.remove('hidden');
+  } else {
+    img.src = '';
+    img.classList.add('hidden');
+  }
+}
+
+function handleReceiptPhotoUpload(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    formReceiptPhoto = e.target.result || '';
+    syncReceiptPhotoPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearReceiptPhoto() {
+  formReceiptPhoto = '';
+  syncReceiptPhotoPreview();
 }
 
 function openReceiptModal(id, typeOverride) {
@@ -1481,6 +1574,7 @@ function openReceiptModal(id, typeOverride) {
     $('fCardYear').value = r.acadYear || 'None';
     $('fFrom').value = r.from;
     $('fExtraDesc').value = r.extraDesc || '';
+    formReceiptPhoto = r.receiptPhoto || '';
     selectedMonths = (r.months || []).filter(m => m !== 'ADMISSION').slice();
     setAmtValue(r.amount, formPaymentType !== 'monthly');
   } else {
@@ -1495,10 +1589,12 @@ function openReceiptModal(id, typeOverride) {
     $('fCardYear').value = (formPaymentType === 'admission' || formPaymentType === 'extra') ? 'None' : currentYear;
     $('fFrom').value = p.name || '';
     $('fExtraDesc').value = '';
+    formReceiptPhoto = '';
     selectedMonths = [];
     setAmtValue(p.amount || '8000', formPaymentType !== 'monthly');
   }
 
+  syncReceiptPhotoPreview();
   applyFormModeUI();
   renderSelectedMonths();
   updateWordsPreview();
@@ -1586,10 +1682,18 @@ async function saveReceipt() {
 
   busy(true);
   try {
-    const { error } = editingId
-      ? await sb.from('fee_records').update(payload).eq('id', editingId)
-      : await sb.from('fee_records').insert(payload);
-    if (error) throw error;
+    let savedRowId = editingId;
+    if (editingId) {
+      const { error } = await sb.from('fee_records').update(payload).eq('id', editingId);
+      if (error) throw error;
+    } else {
+      const { data, error } = await sb.from('fee_records').insert(payload).select('id').single();
+      if (error) throw error;
+      if (data && data.id) savedRowId = data.id;
+    }
+    if (savedRowId) {
+      saveReceiptPhotoLocal(savedRowId, formReceiptPhoto);
+    }
     currentYear = effectiveAcadYear; expandedReceiptId = null; promptReceiptId = null; openDotsId = null;
     persistPageState();
     await reloadData(); closeReceiptModal(); setTab('rec');
