@@ -1082,6 +1082,7 @@ function getReceiptOriginalUrl(r) {
 function parseErpMessage() {
   const txt = ($('fErpMsg') && $('fErpMsg').value) || '';
   if (!txt.trim()) return;
+
   const amtMatch = txt.match(/(?:Rs\.?|LKR)\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
   if (amtMatch) {
     const rawAmt = Math.round(Number(amtMatch[1].replace(/,/g, '')));
@@ -1090,15 +1091,52 @@ function parseErpMessage() {
       updateWordsPreview();
     }
   }
+
   const noMatch = txt.match(/Receipt\s*No\s*[:\-]?\s*([^\n.]+)/i);
   if (noMatch) {
     const rNo = noMatch[1].trim();
     $('fNo').value = rNo;
     $('fOrigUrl').value = buildDefaultReceiptUrl(rNo);
   }
+
   const urlMatch = txt.match(/(https?:\/\/[^\s]+)/i);
   if (urlMatch) {
     $('fOrigUrl').value = urlMatch[1].trim();
+  }
+
+  const invMatch = txt.match(/\b(INV[-\s]?[A-Z0-9]+)\b/i);
+  if (invMatch && $('fInv')) {
+    $('fInv').value = invMatch[1].trim();
+  }
+
+  if (/bank\s*transfer/i.test(txt)) $('fPM').value = 'Online Transfer';
+  else if (/bank\s*deposit/i.test(txt)) $('fPM').value = 'Bank Deposit';
+  else if (/\bcash\b/i.test(txt)) $('fPM').value = 'Cash';
+  else if (/\bcheque\b/i.test(txt)) $('fPM').value = 'Cheque';
+
+  const arrMatch = txt.match(/Arrears[^\n0-9]*([0-9,]+(?:\.[0-9]{1,2})?)/i);
+  if (arrMatch && $('fArrears')) {
+    $('fArrears').value = Number(arrMatch[1].replace(/,/g, '')) || 0;
+  }
+
+  const dtMatch = txt.match(/\b(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{4})\b/i);
+  if (dtMatch && $('fDate')) {
+    const mIdx = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'].indexOf(dtMatch[2].slice(0, 3).toLowerCase());
+    if (mIdx >= 0) {
+      $('fDate').value = `${dtMatch[3]}-${String(mIdx + 1).padStart(2, '0')}-${String(dtMatch[1]).padStart(2, '0')}`;
+    }
+  }
+
+  const monMatch = txt.match(/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})\b/i);
+  if (monMatch && formPaymentType === 'monthly') {
+    const idx = MON.findIndex(m => m.toLowerCase() === monMatch[1].toLowerCase());
+    if (idx >= 0) {
+      const ym = `${monMatch[2]}-${String(idx + 1).padStart(2, '0')}`;
+      if (!selectedMonths.includes(ym)) {
+        selectedMonths = [ym];
+        renderSelectedMonths();
+      }
+    }
   }
 }
 
