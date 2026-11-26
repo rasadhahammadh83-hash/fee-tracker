@@ -56,21 +56,47 @@ button,input,select{font:inherit;color:inherit}
 .btn.sm{padding:8px 12px;font-size:.84rem;border-radius:10px}
 
 .topbar{position:sticky;top:0;z-index:15;background:#ffffff;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--line)}
+.topbar-left{display:flex;align-items:center;gap:8px}
 .menu-btn{background:#f7faf9;border:1px solid var(--line);border-radius:11px;width:40px;height:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer}
 .menu-btn span{width:19px;height:2.2px;background:var(--brand);border-radius:2px;display:block}
+.refresh-btn{background:var(--brand-light);border:1px solid rgba(13,76,92,.2);border-radius:11px;height:40px;padding:0 11px;display:inline-flex;align-items:center;gap:5px;color:var(--brand);font-weight:700;font-size:.82rem;cursor:pointer}
+.refresh-btn:active{transform:scale(.96);background:#d2e7ec}
+.refresh-btn.spinning .ref-icon{display:inline-block;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
 .top-info{text-align:right}
 .top-info .t-main{font-weight:800;font-size:1rem;color:var(--brand)}
 .top-info .t-yr{font-size:.75rem;font-weight:700;color:var(--accent);background:var(--brand-light);padding:2px 8px;border-radius:20px;display:inline-block}
 
 .drawer-ov{position:fixed;inset:0;background:rgba(10,25,25,.45);z-index:30;opacity:0;pointer-events:none;transition:.25s}
 .drawer-ov.open{opacity:1;pointer-events:auto}
-.drawer{position:fixed;top:0;bottom:0;left:0;width:55%;max-width:270px;min-width:215px;background:#fff;z-index:35;
+.drawer{position:fixed;top:0;bottom:0;left:0;width:68%;max-width:295px;min-width:230px;background:#fff;z-index:35;
   transform:translateX(-100%);transition:transform .28s cubic-bezier(.22,1,.36,1);display:flex;flex-direction:column;box-shadow:10px 0 35px rgba(0,0,0,.18);border-radius:0 22px 22px 0;overflow-y:auto}
 .drawer.open{transform:translateX(0)}
-.d-head{padding:18px 14px 12px;background:linear-gradient(135deg,var(--brand),#16697a);color:#fff}
+.d-head{padding:16px 14px 12px;background:linear-gradient(135deg,var(--brand),#16697a);color:#fff}
 .d-head .d-name{font-weight:700;font-size:.94rem;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .d-head .d-adm{font-size:.76rem;opacity:.85}
-.d-nav{padding:10px;flex:1}
+
+.menu-total-wrap{padding:10px 10px 4px}
+.menu-sum-card{
+  background:linear-gradient(135deg,var(--brand) 0%,#14687a 100%);
+  color:#fff;border-radius:16px;padding:13px 14px;
+  box-shadow:0 8px 20px rgba(13,76,92,.22);cursor:pointer;position:relative
+}
+.menu-sum-card::after{
+  content:"All Years ▾";position:absolute;right:10px;bottom:10px;
+  font-size:.66rem;background:rgba(255,255,255,.18);padding:2px 7px;border-radius:20px
+}
+.menu-sum-lbl{font-size:.73rem;opacity:.9;font-weight:700;letter-spacing:.2px}
+.menu-sum-val{font-size:1.38rem;font-weight:800;margin:2px 0 2px;letter-spacing:-.3px}
+.menu-sum-sub{font-size:.71rem;opacity:.88}
+.menu-yr-breakdown{
+  background:#f7faf9;border:1px solid var(--line);border-radius:12px;
+  padding:8px 10px;margin-top:6px;font-size:.78rem
+}
+.menu-yr-row{display:flex;justify-content:space-between;padding:4px 2px;border-bottom:1px dashed var(--line)}
+.menu-yr-row:last-child{border-bottom:0}
+
+.d-nav{padding:8px 10px 14px;flex:1}
 .nav-item{width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;border:0;background:transparent;border-radius:11px;font-weight:600;font-size:.9rem;color:var(--ink);cursor:pointer;text-align:left;margin-bottom:4px}
 .nav-item.active{background:var(--brand-light);color:var(--brand);font-weight:700}
 .nav-group-btn{justify-content:space-between}
@@ -86,17 +112,6 @@ button,input,select{font:inherit;color:inherit}
 .sum-lbl{font-size:.82rem;opacity:.88;font-weight:600}
 .sum-val{font-size:1.85rem;font-weight:800;margin:3px 0 4px;letter-spacing:-.4px}
 .sum-yr{font-size:.8rem;opacity:.9}
-
-/* MENU TOTAL BOX (ALL YEARS) */
-.d-total{cursor:default;padding:14px;margin:10px 10px 0;border-radius:16px}
-.d-total::after{display:none}
-.d-total .sum-val{font-size:1.4rem}
-
-/* PULL TO REFRESH */
-html,body{overscroll-behavior-y:contain}
-#ptr{position:fixed;top:0;left:50%;transform:translate(-50%,-60px);z-index:50;width:38px;height:38px;border-radius:50%;background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.2);display:flex;align-items:center;justify-content:center;color:var(--brand);font-size:1.3rem;font-weight:800;opacity:0;pointer-events:none}
-#ptr.spin span{display:inline-block;animation:ptrspin .7s linear infinite}
-@keyframes ptrspin{to{transform:rotate(360deg)}}
 
 .breakdown{background:var(--card);border-radius:14px;padding:12px;margin-top:8px;border:1px solid var(--line);box-shadow:var(--shadow)}
 .bd-row{display:flex;justify-content:space-between;align-items:center;padding:8px 4px;border-bottom:1px dashed var(--line);font-size:.88rem}
@@ -138,14 +153,72 @@ html,body{overscroll-behavior-y:contain}
 }
 .dots-del-btn:active{background:#ffe0dc}
 
-.rc{background:#fff;border:1.5px solid #333;box-shadow:0 8px 22px rgba(0,0,0,.09);border-radius:8px;padding:16px 13px 14px;margin-top:6px;margin-bottom:14px;font-family:'Times New Roman',Georgia,serif;color:#222}
-.rc .t1{text-align:center;font-size:1.28rem;font-weight:700;letter-spacing:.3px}
-.rc .t2{text-align:center;font-size:.9rem;font-weight:700}
-.rc .pill{text-align:center;margin:7px 0 6px}
-.rc .pill span{background:#3a3232;color:#fff;font-style:italic;font-weight:700;border-radius:16px;padding:3px 20px;display:inline-block;font-size:.88rem}
-.rr{display:flex;align-items:flex-end;gap:5px;margin-top:10px;font-size:.88rem}
-.rr span:first-child,.rr span:nth-child(3),.rr span:last-child{white-space:nowrap}
-.rr .v{flex:1;min-width:0;border-bottom:1px dotted #222;font-style:italic;font-size:.9rem;padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* NEW PAYMENT RECEIPT CARD DESIGN */
+.nr-wrap{
+  background:#ffffff;border:1px solid #d9e2ec;border-radius:12px;
+  box-shadow:0 10px 26px rgba(15,23,42,.1);padding:16px 14px 14px;
+  margin-top:6px;margin-bottom:14px;color:#1e293b;font-family:'Plus Jakarta Sans',sans-serif
+}
+.nr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-bottom:12px;border-bottom:1px solid #e2e8f0}
+.nr-crest{
+  width:46px;height:46px;border-radius:50%;border:2px solid #1e293b;
+  display:flex;align-items:center;justify-content:center;font-weight:800;
+  font-size:.7rem;text-align:center;line-height:1.1;background:#f8fafc;flex-shrink:0
+}
+.nr-org-right{text-align:right;flex:1;min-width:0}
+.nr-inst{font-size:.86rem;font-weight:800;letter-spacing:.5px;color:#0f172a}
+.nr-sub-line{font-size:.78rem;font-weight:600;color:#475569;margin-top:2px}
+.nr-doc-title{font-size:.82rem;font-weight:800;letter-spacing:.8px;color:#0f9d76;margin-top:2px;text-transform:uppercase}
+
+.nr-meta-box{
+  border:1px solid #cbd5e1;border-radius:8px;padding:10px 12px;margin-top:12px;
+  display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;background:#ffffff
+}
+.nr-lbl{font-size:.63rem;font-weight:800;letter-spacing:.6px;color:#64748b;text-transform:uppercase}
+.nr-val{font-size:.8rem;font-weight:700;color:#0f172a;margin-top:2px;word-break:break-word}
+.nr-paid-pill{
+  display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:#15803d;
+  border:1px solid #86efac;border-radius:999px;padding:2px 8px;font-size:.7rem;font-weight:800;margin-top:3px
+}
+
+.nr-sec-title{
+  font-size:.68rem;font-weight:800;letter-spacing:.7px;color:#475569;
+  text-transform:uppercase;margin:14px 0 6px
+}
+.nr-bd-box{border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
+.nr-bd-head{
+  display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;
+  background:#f1f5f9;padding:7px 10px;font-size:.63rem;font-weight:800;
+  color:#475569;text-transform:uppercase;letter-spacing:.4px
+}
+.nr-bd-row{
+  display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:6px;align-items:center;
+  padding:9px 10px;font-size:.76rem;border-top:1px solid #e2e8f0;background:#fff
+}
+.nr-inv-code{font-weight:800;color:#0f172a;font-size:.74rem}
+.nr-inv-month{color:#475569;font-size:.71rem;margin-top:1px}
+.nr-amt-cell{font-weight:700;color:#0f172a;text-align:right}
+.nr-arr-cell{font-weight:700;color:#15803d;text-align:right;font-size:.72rem}
+
+.nr-total-row{display:flex;justify-content:flex-end;margin-top:10px}
+.nr-total-box{
+  border:1.5px solid #94a3b8;border-radius:8px;padding:7px 12px;
+  background:#f8fafc;display:flex;align-items:center;gap:10px
+}
+.nr-total-lbl{font-size:.68rem;font-weight:800;color:#334155;letter-spacing:.4px}
+.nr-total-val{font-size:.88rem;font-weight:800;color:#0f172a}
+
+.nr-seal-wrap{display:flex;justify-content:flex-end;margin-top:10px}
+.nr-seal{
+  border:1.5px dashed #64748b;border-radius:6px;padding:6px 10px;
+  text-align:center;color:#475569;font-size:.62rem;font-weight:700;line-height:1.25;min-width:86px
+}
+.nr-footer{
+  margin-top:12px;padding-top:10px;border-top:1px solid #e2e8f0;
+  text-align:center;color:#64748b;font-size:.68rem
+}
+.nr-footer .nr-note{font-style:italic;margin-bottom:3px}
+
 .rbtn{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:13px;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
 .rbtn .btn{padding:8px 4px;font-size:.76rem;border-radius:9px}
 
@@ -216,7 +289,13 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
 
 <div id="app" onclick="closeAllDotsMenus()">
   <div class="topbar">
-    <button class="menu-btn" onclick="event.stopPropagation();toggleMenu(true)" aria-label="Menu"><span></span><span></span><span></span></button>
+    <div class="topbar-left">
+      <button class="menu-btn" onclick="event.stopPropagation();toggleMenu(true)" aria-label="Menu"><span></span><span></span><span></span></button>
+      <button type="button" class="refresh-btn" id="btnRefresh" onclick="manualRefresh(event)" aria-label="Refresh">
+        <span class="ref-icon">↻</span>
+        <span>Refresh</span>
+      </button>
+    </div>
     <div class="top-info">
       <div class="t-main">FEE TRACKER</div>
       <div class="t-yr" id="activeYearBadge">1st year</div>
@@ -230,11 +309,16 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
       <div class="d-name" id="menuName">Student</div>
       <div class="d-adm" id="menuAdm">Adm. No: -</div>
     </div>
-    <div class="sum-card d-total">
-      <div class="sum-lbl">Total Paid – All Years (LKR)</div>
-      <div class="sum-val" id="sAllTotal">LKR 0</div>
-      <div class="sum-yr">1st – 7th year</div>
+
+    <div class="menu-total-wrap">
+      <div class="menu-sum-card" onclick="toggleMenuYearBreakdown()">
+        <div class="menu-sum-lbl">Total Paid (All Years)</div>
+        <div class="menu-sum-val" id="menuAllTotal">LKR 0</div>
+        <div class="menu-sum-sub">1st Year – 7th Year Combined</div>
+      </div>
+      <div id="menuYearBreakdown" class="menu-yr-breakdown hidden"></div>
     </div>
+
     <div class="d-nav">
       <button class="nav-item active" id="navDash" onclick="goDashboard()">Dashboard</button>
       <button class="nav-item nav-group-btn" onclick="toggleYearsList()"><span>Years</span><span id="yrArrow">▾</span></button>
@@ -299,7 +383,7 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
   <div class="sheet">
     <h2 id="fTitle" style="margin:0 0 8px;color:var(--brand)">Monthly Payment</h2>
     <div class="two">
-      <div><label for="fNo">No.</label><input id="fNo" class="f" type="text" inputmode="numeric" placeholder="Receipt No."></div>
+      <div><label for="fNo">No.</label><input id="fNo" class="f" type="text" placeholder="e.g. MF - 00827"></div>
       <div><label for="fDate">Date (Tap to change)</label><input id="fDate" class="f" type="date"></div>
     </div>
     <div class="two">
@@ -405,7 +489,6 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
   </div>
 </div>
 
-<div id="ptr"><span>↻</span></div>
 <div id="busy" class="hidden">Processing...</div>
 
 <script>
@@ -426,14 +509,24 @@ let selectedMonths = [], editingId = null, uploadedPhotoB64 = undefined;
 let formPaymentType = 'monthly';
 let expandedReceiptId = null, promptReceiptId = null, openDotsId = null;
 let pendingDeleteId = null, pendingPermDeleteId = null;
-let trapTimer = null;
+let trapTimer = null, realtimeChannel = null, isRefreshing = false;
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt = n => Number(n).toLocaleString('en-US', {maximumFractionDigits: 2});
+const fmt2 = n => Number(n || 0).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 const fd = iso => iso ? iso.split('-').reverse().join('/') : '';
 const todayStr = () => new Date().toISOString().slice(0, 10);
 const busy = b => $('busy').classList.toggle('hidden', !b);
+
+function formatReceiptDateTime(iso) {
+  if (!iso) return '';
+  const parts = iso.split('-');
+  if (parts.length !== 3) return iso;
+  const mIdx = Number(parts[1]) - 1;
+  const monShort = (M3[mIdx] || '').charAt(0) + (M3[mIdx] || '').slice(1).toLowerCase();
+  return `${parts[2]} ${monShort} ${parts[0]}, 12:00 AM`;
+}
 
 function getActivePin() {
   if (S && S.profile && S.profile.pin) return String(S.profile.pin);
@@ -500,7 +593,6 @@ function handleBackAction() {
     return;
   }
 
-  // On dashboard -> Back brings user straight to Login Screen and holds there
   lockToLogin(true);
 }
 window.addEventListener('popstate', handleBackAction);
@@ -516,8 +608,65 @@ function lockToLogin(stayOnLogin = false) {
   }
 }
 
+/* REALTIME & APP RESUME REFRESH FOR WEB APK */
+function setupRealtimeAndResume() {
+  if (!realtimeChannel) {
+    try {
+      realtimeChannel = sb.channel('fee_records_live_sync')
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'fee_records' }, async () => {
+          if (S && !isRefreshing) {
+            await silentSync();
+          }
+        })
+        .subscribe();
+    } catch (e) {}
+  }
+
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden && S && !isRefreshing) {
+      silentSync();
+    }
+  });
+
+  window.addEventListener('focus', () => {
+    if (S && !isRefreshing) {
+      silentSync();
+    }
+  });
+}
+
+async function silentSync() {
+  if (!S || isRefreshing) return;
+  isRefreshing = true;
+  try {
+    S = await fetchAllFromSupabase();
+    syncProfileUI();
+    renderAll();
+  } catch (e) {}
+  isRefreshing = false;
+}
+
+async function manualRefresh(ev) {
+  if (ev) ev.stopPropagation();
+  if (!S || isRefreshing) return;
+  isRefreshing = true;
+  const btn = $('btnRefresh');
+  if (btn) btn.classList.add('spinning');
+  try {
+    S = await fetchAllFromSupabase();
+    syncProfileUI();
+    renderAll();
+  } catch (e) {
+    alert(e.message || 'Refresh failed');
+  }
+  if (btn) btn.classList.remove('spinning');
+  isRefreshing = false;
+}
+
 window.addEventListener('DOMContentLoaded', async () => {
   initDropdowns();
+  setupRealtimeAndResume();
+
   const cachedPhoto = localStorage.getItem('ft_avatar');
   if (cachedPhoto) $('loginAvatar').src = cachedPhoto;
 
@@ -653,8 +802,27 @@ function syncProfileUI() {
   $('menuAdm').textContent = 'Adm. No: ' + (p.adm || 'Not set');
 }
 
-function toggleMenu(open) { $('drawer').classList.toggle('open', open); $('drawerOv').classList.toggle('open', open); }
+function toggleMenu(open) {
+  $('drawer').classList.toggle('open', open);
+  $('drawerOv').classList.toggle('open', open);
+  if (open && S) renderMenuGrandTotal();
+}
 function toggleYearsList() { const el = $('yrSubList'); const h = el.classList.toggle('hidden'); $('yrArrow').textContent = h ? '▸' : '▾'; }
+function toggleMenuYearBreakdown() { $('menuYearBreakdown').classList.toggle('hidden'); }
+
+function renderMenuGrandTotal() {
+  if (!S) return;
+  const activeRecs = getActiveRecords();
+  const grandTotal = activeRecs.reduce((s, r) => s + r.amount, 0);
+  $('menuAllTotal').textContent = 'LKR ' + fmt(grandTotal);
+
+  $('menuYearBreakdown').innerHTML = YEARS.map(y => {
+    const yrSum = activeRecs
+      .filter(r => (r.acadYear || r.cls) === y)
+      .reduce((s, r) => s + r.amount, 0);
+    return `<div class="menu-yr-row"><span>${esc(y)}</span><b>LKR ${fmt(yrSum)}</b></div>`;
+  }).join('');
+}
 
 function goDashboard() {
   viewMode = 'dashboard';
@@ -694,13 +862,29 @@ function formatMonthsLabel(r) {
   if (r.isExtra) return r.extraDesc || r.month || 'Extra Payment';
   if (r.isAdmissionFee) return 'Admission Fee';
   const arr = Array.isArray(r) ? r : (r.months || []);
-  if (!arr.length) return '';
+  if (!arr.length) return r.month || '';
   if (arr.length === 1 && arr[0] === 'ADMISSION') return 'Admission Fee';
   const filtered = arr.filter(x => x !== 'ADMISSION');
-  const years = [...new Set(filtered.map(m => m.slice(0, 4)))];
-  const names = filtered.map(m => MON[Number(m.slice(5, 7)) - 1]);
-  const mp = years.length === 1 ? names.join(', ') + ' ' + years[0] : filtered.map(m => MON[Number(m.slice(5, 7)) - 1] + ' ' + m.slice(0, 4)).join(', ');
+  const validYM = filtered.filter(m => /^\d{4}-\d{2}$/.test(m));
+  if (!validYM.length) return r.month || filtered.join(', ');
+  const years = [...new Set(validYM.map(m => m.slice(0, 4)))];
+  const names = validYM.map(m => MON[Number(m.slice(5, 7)) - 1]);
+  const mp = years.length === 1 ? names.join(', ') + ' ' + years[0] : validYM.map(m => MON[Number(m.slice(5, 7)) - 1] + ' ' + m.slice(0, 4)).join(', ');
   return arr.includes('ADMISSION') ? ('Admission Fee' + (mp ? ', ' + mp : '')) : mp;
+}
+
+function getHeaderFeeSubtitle(r) {
+  const mLabel = formatMonthsLabel(r);
+  if (r.isExtra) return mLabel || 'Extra Payment';
+  if (r.isAdmissionFee) return 'Admission Fee';
+  return mLabel ? ('Monthly Fee - ' + mLabel) : 'Monthly Fee';
+}
+
+function getInvoiceCode(r) {
+  const m = (r.months || []).find(x => /^\d{4}-\d{2}$/.test(x));
+  if (m) return 'INV-' + m.slice(2, 4) + m.slice(5, 7);
+  const digits = String(r.no || '').replace(/\D/g, '');
+  return 'INV-' + (digits ? digits.slice(-4) : '0001');
 }
 
 function updateFabVisibility() {
@@ -709,13 +893,12 @@ function updateFabVisibility() {
 }
 
 function renderAll() {
+  renderMenuGrandTotal();
+
   const delRecs = getDeletedRecords();
   const badge = $('binCountBadge');
   badge.textContent = delRecs.length;
   badge.classList.toggle('hidden', delRecs.length === 0);
-
-  // Grand total of all years (1st - 7th), excluding Bin
-  $('sAllTotal').textContent = 'LKR ' + fmt(getActiveRecords().reduce((s, r) => s + r.amount, 0));
 
   $('navDash').classList.toggle('active', viewMode === 'dashboard');
   $('navBin').classList.toggle('active', viewMode === 'bin');
@@ -792,7 +975,90 @@ function renderReceiptsList(yrRecs) {
       </div>`;
     }
 
-    return `<div class="r-bar-wrap"><div class="rc"><div class="t1">JAMIAH NALEEMIAH</div><div class="t2">P.O.BOX 1, BERUWALA</div><div class="pill"><span>BOARDING FEE</span></div><div class="rr"><span>No.</span><span class="v">${esc(r.no)}</span><span>Date</span><span class="v">${fd(r.date)}</span></div><div class="rr"><span>Adm.No</span><span class="v">${esc(r.adm)}</span><span>Class</span><span class="v">${esc(r.cls)}</span></div><div class="rr"><span>Received with thanks from</span><span class="v">${esc(r.from)}</span></div><div class="rr"><span>a sum of Rupees</span><span class="v">${esc(r.words)}</span></div><div class="rr"><span>${r.isExtra ? 'for' : 'for the month / months'}</span><span class="v">${esc(mText)}</span><span>${r.isExtra ? '' : 'being boarding fee.'}</span></div><div class="rr" style="margin-top:24px;align-items:center"><span>Rs.</span><span class="v">${fmt(r.amount)}</span><span style="flex:1.15;margin-left:8%;text-align:center"><span style="display:block;border-top:1px dotted #222;margin-bottom:4px"></span><span style="display:block;font-size:.76rem">Head - Student administration</span></span></div><div class="rbtn"><button type="button" class="btn" onclick="downloadReceiptImg('${r.id}')">Download Image</button><button type="button" class="btn ghost" onclick="shareReceiptImg('${r.id}')">Share</button><button type="button" class="btn ghost" onclick="openReceiptModal('${r.id}')">Edit</button><button type="button" class="btn soft" onclick="doneReceipt()">Done</button></div></div></div>`;
+    const studentDisp = `${r.from || ''}${r.adm ? ' (' + r.adm + ')' : ''}`;
+    const headerSub = getHeaderFeeSubtitle(r);
+    const invCode = getInvoiceCode(r);
+    const amtFmt = 'Rs. ' + fmt2(r.amount);
+
+    return `<div class="r-bar-wrap">
+      <div class="nr-wrap">
+        <div class="nr-top">
+          <div class="nr-crest">JN<br>SEAL</div>
+          <div class="nr-org-right">
+            <div class="nr-inst">JAMIAH NALEEMIAH</div>
+            <div class="nr-sub-line">${esc(headerSub)}</div>
+            <div class="nr-doc-title">PAYMENT RECEIPT</div>
+          </div>
+        </div>
+
+        <div class="nr-meta-box">
+          <div>
+            <div class="nr-lbl">RECEIPT NO</div>
+            <div class="nr-val">${esc(r.no)}</div>
+          </div>
+          <div>
+            <div class="nr-lbl">STUDENT DETAILS</div>
+            <div class="nr-val">${esc(studentDisp)}</div>
+          </div>
+          <div>
+            <div class="nr-lbl">PAYMENT DATE</div>
+            <div class="nr-val">${esc(formatReceiptDateTime(r.date))}</div>
+          </div>
+          <div>
+            <div class="nr-lbl">STATUS</div>
+            <div class="nr-paid-pill">✓ PAID</div>
+          </div>
+          <div>
+            <div class="nr-lbl">PAYMENT METHOD</div>
+            <div class="nr-val">Bank Deposit</div>
+          </div>
+          <div>
+            <div class="nr-lbl">ISSUED BY</div>
+            <div class="nr-val">Accounts Division</div>
+          </div>
+        </div>
+
+        <div class="nr-sec-title">PAYMENT BREAKDOWN</div>
+        <div class="nr-bd-box">
+          <div class="nr-bd-head">
+            <div>INVOICE / MONTH</div>
+            <div style="text-align:right">AMOUNT PAID</div>
+            <div style="text-align:right">ARREARS BALANCE</div>
+          </div>
+          <div class="nr-bd-row">
+            <div>
+              <div class="nr-inv-code">${esc(invCode)}</div>
+              <div class="nr-inv-month">${esc(mText)}</div>
+            </div>
+            <div class="nr-amt-cell">${esc(amtFmt)}</div>
+            <div class="nr-arr-cell">✓ Rs. 0.00</div>
+          </div>
+        </div>
+
+        <div class="nr-total-row">
+          <div class="nr-total-box">
+            <span class="nr-total-lbl">TOTAL RECEIVED</span>
+            <span class="nr-total-val">${esc(amtFmt)}</span>
+          </div>
+        </div>
+
+        <div class="nr-seal-wrap">
+          <div class="nr-seal">OFFICIAL<br>SEAL</div>
+        </div>
+
+        <div class="nr-footer">
+          <div class="nr-note">This is an official computer-generated receipt issued by Jamiah Naleemiah and requires no physical signature.</div>
+          <div>P.O. Box 01, Beruwala, Sri Lanka. | Email: info@naleemiah.edu.lk | Web: naleemiah.edu.lk</div>
+        </div>
+
+        <div class="rbtn">
+          <button type="button" class="btn" onclick="downloadReceiptImg('${r.id}')">Download Image</button>
+          <button type="button" class="btn ghost" onclick="shareReceiptImg('${r.id}')">Share</button>
+          <button type="button" class="btn ghost" onclick="openReceiptModal('${r.id}')">Edit</button>
+          <button type="button" class="btn soft" onclick="doneReceipt()">Done</button>
+        </div>
+      </div>
+    </div>`;
   }).join('');
 }
 
@@ -902,38 +1168,201 @@ function wordsJS(n) {
 }
 
 const SER = '"Times New Roman", Georgia, serif';
+const SANS = '"Plus Jakarta Sans", system-ui, sans-serif';
 function rrect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
 function dotted(g, x1, x2, y, w) { g.save(); g.setLineDash([3, 6]); g.lineWidth = w || 2; g.strokeStyle = '#222'; g.beginPath(); g.moveTo(x1, y); g.lineTo(x2, y); g.stroke(); g.restore(); }
-function drawField(g, lab, val, x, y, x2) {
-  g.fillStyle = '#222'; g.font = '31px ' + SER; g.fillText(lab, x, y);
-  const sx = x + g.measureText(lab).width + 12; dotted(g, sx, x2, y + 6);
-  let fs = 32; g.font = 'italic ' + fs + 'px ' + SER;
-  const maxW = Math.max(80, x2 - sx - 14);
-  while (g.measureText(val).width > maxW && fs > 17) { fs -= 1.5; g.font = 'italic ' + fs + 'px ' + SER; }
-  g.fillText(val, sx + 7, y - 3);
-}
 
+/* NEW PAYMENT RECEIPT PHOTO CANVAS RENDERER */
 function buildReceiptCanvas(r) {
-  const c = document.createElement('canvas'); c.width = 1200; c.height = 810; const g = c.getContext('2d');
-  g.fillStyle = '#fff'; g.fillRect(0, 0, 1200, 810); g.strokeStyle = '#333'; g.lineWidth = 4; g.strokeRect(14, 14, 1172, 782);
-  g.fillStyle = '#222'; g.textAlign = 'center'; g.font = 'bold 58px ' + SER; g.fillText('JAMIAH NALEEMIAH', 600, 98);
-  g.font = 'bold 34px ' + SER; g.fillText('P.O.BOX 1, BERUWALA', 600, 150);
-  g.fillStyle = '#3a3232'; rrect(g, 390, 178, 420, 68, 34); g.fill();
-  g.fillStyle = '#fff'; g.font = 'italic bold 39px ' + SER; g.fillText('BOARDING FEE', 600, 226);
+  const c = document.createElement('canvas');
+  c.width = 1240;
+  c.height = 960;
+  const g = c.getContext('2d');
+
+  const mText = formatMonthsLabel(r);
+  const headerSub = getHeaderFeeSubtitle(r);
+  const invCode = getInvoiceCode(r);
+  const amtFmt = 'Rs. ' + fmt2(r.amount);
+  const studentDisp = `${r.from || ''}${r.adm ? ' (' + r.adm + ')' : ''}`;
+  const dateDisp = formatReceiptDateTime(r.date);
+
+  // Outer clean white sheet
+  g.fillStyle = '#ffffff';
+  g.fillRect(0, 0, c.width, c.height);
+
+  // Top Header Left Crest
+  g.save();
+  g.strokeStyle = '#1e293b';
+  g.lineWidth = 3;
+  g.fillStyle = '#f8fafc';
+  g.beginPath();
+  g.arc(105, 92, 42, 0, Math.PI * 2);
+  g.fill();
+  g.stroke();
+  g.fillStyle = '#1e293b';
+  g.font = '800 18px ' + SANS;
+  g.textAlign = 'center';
+  g.fillText('JN SEAL', 105, 98);
+  g.restore();
+
+  // Top Header Right Organization & Fee Month
+  g.textAlign = 'right';
+  g.fillStyle = '#0f172a';
+  g.font = '800 28px ' + SANS;
+  g.fillText('JAMIAH NALEEMIAH', 1170, 74);
+
+  g.fillStyle = '#475569';
+  g.font = '600 22px ' + SANS;
+  g.fillText(headerSub, 1170, 106);
+
+  g.fillStyle = '#0f9d76';
+  g.font = '800 23px ' + SANS;
+  g.fillText('PAYMENT RECEIPT', 1170, 136);
+
+  // Divider line under top header
+  g.strokeStyle = '#e2e8f0';
+  g.lineWidth = 2;
+  g.beginPath();
+  g.moveTo(70, 162);
+  g.lineTo(1170, 162);
+  g.stroke();
+
+  // Metadata Box (2 columns x 3 rows)
+  g.strokeStyle = '#cbd5e1';
+  g.lineWidth = 2;
+  g.fillStyle = '#ffffff';
+  rrect(g, 70, 184, 1100, 236, 12);
+  g.fill();
+  g.stroke();
+
+  const col1X = 100;
+  const col2X = 635;
+  const rowYs = [222, 298, 374];
+
   g.textAlign = 'left';
-  drawField(g, 'No.', r.no, 55, 330, 580); drawField(g, 'Date', fd(r.date), 640, 330, 1145);
-  drawField(g, 'Adm.No', r.adm, 55, 410, 580); drawField(g, 'Class', r.cls, 640, 410, 1145);
-  drawField(g, 'Received with thanks from', r.from, 55, 490, 1145);
-  drawField(g, 'a sum of Rupees', wordsJS(r.amount), 55, 570, 1145);
-  if (r.isExtra) {
-    drawField(g, 'for', formatMonthsLabel(r), 55, 650, 1145);
-  } else {
-    drawField(g, 'for the month / months', formatMonthsLabel(r), 55, 650, 855);
-    g.fillStyle = '#222'; g.font = '31px ' + SER; g.fillText('being boarding fee.', 868, 650);
-  }
-  drawField(g, 'Rs.', fmt(r.amount), 55, 742, 430);
-  dotted(g, 680, 1145, 748); g.fillStyle = '#222'; g.font = '30px ' + SER; g.textAlign = 'center';
-  g.fillText('Head - Student administration', 912, 782);
+  // Row 1: RECEIPT NO & STUDENT DETAILS
+  g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('RECEIPT NO', col1X, rowYs[0]);
+  g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText(String(r.no || ''), col1X, rowYs[0] + 28);
+
+  g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('STUDENT DETAILS', col2X, rowYs[0]);
+  g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText(studentDisp, col2X, rowYs[0] + 28);
+
+  // Row 2: PAYMENT DATE & STATUS
+  g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('PAYMENT DATE', col1X, rowYs[1]);
+  g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText(dateDisp, col1X, rowYs[1] + 28);
+
+  g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('STATUS', col2X, rowYs[1]);
+  g.fillStyle = '#dcfce7';
+  rrect(g, col2X, rowYs[1] + 8, 96, 30, 15);
+  g.fill();
+  g.strokeStyle = '#86efac'; g.lineWidth = 1.5; g.stroke();
+  g.fillStyle = '#15803d'; g.font = '800 16px ' + SANS; g.fillText('✓ PAID', col2X + 16, rowYs[1] + 29);
+
+  // Row 3: PAYMENT METHOD & ISSUED BY
+  g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('PAYMENT METHOD', col1X, rowYs[2]);
+  g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText('Bank Deposit', col1X, rowYs[2] + 28);
+
+  g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('ISSUED BY', col2X, rowYs[2]);
+  g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText('Accounts Division', col2X, rowYs[2] + 28);
+
+  // PAYMENT BREAKDOWN Section
+  g.fillStyle = '#475569';
+  g.font = '800 17px ' + SANS;
+  g.fillText('PAYMENT BREAKDOWN', 70, 458);
+
+  // Table Container
+  g.strokeStyle = '#e2e8f0';
+  g.lineWidth = 2;
+  rrect(g, 70, 474, 1100, 126, 10);
+  g.stroke();
+
+  // Table Header
+  g.fillStyle = '#f1f5f9';
+  rrect(g, 71, 475, 1098, 44, 9);
+  g.fill();
+
+  g.fillStyle = '#475569';
+  g.font = '800 15px ' + SANS;
+  g.textAlign = 'left';
+  g.fillText('INVOICE / MONTH', 94, 503);
+  g.textAlign = 'right';
+  g.fillText('AMOUNT PAID', 840, 503);
+  g.fillText('ARREARS BALANCE', 1146, 503);
+
+  // Divider between table header and row
+  g.strokeStyle = '#e2e8f0';
+  g.beginPath();
+  g.moveTo(70, 520);
+  g.lineTo(1170, 520);
+  g.stroke();
+
+  // Table Data Row
+  g.textAlign = 'left';
+  g.fillStyle = '#0f172a';
+  g.font = '800 20px ' + SANS;
+  g.fillText(invCode, 94, 552);
+  g.fillStyle = '#475569';
+  g.font = '600 19px ' + SANS;
+  g.fillText(mText, 94, 580);
+
+  g.textAlign = 'right';
+  g.fillStyle = '#0f172a';
+  g.font = '700 21px ' + SANS;
+  g.fillText(amtFmt, 840, 560);
+
+  g.fillStyle = '#15803d';
+  g.font = '700 20px ' + SANS;
+  g.fillText('✓ Rs. 0.00', 1146, 560);
+
+  // TOTAL RECEIVED Box (Right aligned)
+  g.fillStyle = '#f8fafc';
+  g.strokeStyle = '#94a3b8';
+  g.lineWidth = 2;
+  rrect(g, 730, 624, 440, 54, 10);
+  g.fill();
+  g.stroke();
+
+  g.textAlign = 'left';
+  g.fillStyle = '#334155';
+  g.font = '800 17px ' + SANS;
+  g.fillText('TOTAL RECEIVED', 754, 658);
+
+  g.textAlign = 'right';
+  g.fillStyle = '#0f172a';
+  g.font = '800 24px ' + SANS;
+  g.fillText(amtFmt, 1148, 659);
+
+  // OFFICIAL SEAL Box (Dashed, right aligned)
+  g.save();
+  g.setLineDash([6, 6]);
+  g.strokeStyle = '#64748b';
+  g.lineWidth = 2;
+  rrect(g, 990, 704, 180, 74, 8);
+  g.stroke();
+  g.restore();
+
+  g.textAlign = 'center';
+  g.fillStyle = '#475569';
+  g.font = '700 17px ' + SANS;
+  g.fillText('OFFICIAL', 1080, 735);
+  g.fillText('SEAL', 1080, 758);
+
+  // Footer Divider & Text
+  g.strokeStyle = '#e2e8f0';
+  g.lineWidth = 2;
+  g.beginPath();
+  g.moveTo(70, 816);
+  g.lineTo(1170, 816);
+  g.stroke();
+
+  g.textAlign = 'center';
+  g.fillStyle = '#64748b';
+  g.font = 'italic 18px ' + SANS;
+  g.fillText('This is an official computer-generated receipt issued by Jamiah Naleemiah and requires no physical signature.', 620, 856);
+
+  g.font = '600 18px ' + SANS;
+  g.fillText('P.O. Box 01, Beruwala, Sri Lanka. | Email: info@naleemiah.edu.lk | Web: naleemiah.edu.lk', 620, 892);
+
   return c;
 }
 
@@ -961,8 +1390,8 @@ function triggerDownload(canvas, filename) { const a = document.createElement('a
 async function triggerShare(canvas, filename, titleText) {
   canvas.toBlob(async blob => { const file = new File([blob], filename, { type: 'image/jpeg' }); if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: titleText }); return; } catch (e) {} } triggerDownload(canvas, filename); }, 'image/jpeg', 0.94);
 }
-function downloadReceiptImg(id) { const r = S.allRecords.find(x => String(x.id) === String(id)); if (r) triggerDownload(buildReceiptCanvas(r), `Receipt_${r.no}.jpg`); }
-function shareReceiptImg(id) { const r = S.allRecords.find(x => String(x.id) === String(id)); if (r) triggerShare(buildReceiptCanvas(r), `Receipt_${r.no}.jpg`, `Boarding Fee Receipt #${r.no}`); }
+function downloadReceiptImg(id) { const r = S.allRecords.find(x => String(x.id) === String(id)); if (r) triggerDownload(buildReceiptCanvas(r), `Receipt_${String(r.no || '').replace(/\s+/g,'_')}.jpg`); }
+function shareReceiptImg(id) { const r = S.allRecords.find(x => String(x.id) === String(id)); if (r) triggerShare(buildReceiptCanvas(r), `Receipt_${String(r.no || '').replace(/\s+/g,'_')}.jpg`, `Payment Receipt #${r.no}`); }
 function downloadCardImg() { triggerDownload(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.jpg`); }
 function shareCardImg() { triggerShare(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.jpg`, `Hostel Fee Card - ${currentYear}`); }
 
@@ -1139,59 +1568,6 @@ async function saveProfile() {
   } catch (e) { $('pErr').textContent = e.message || 'Save failed'; }
   busy(false);
 }
-
-/* PULL TO REFRESH + AUTO REFRESH */
-(function () {
-  let startY = 0, pull = 0, pulling = false, loading = false;
-  const MAXP = 90, TH = 60;
-  const ptr = () => $('ptr');
-  const blocked = () => !S || loading || window.scrollY > 0 ||
-    $('drawer').classList.contains('open') ||
-    ['ovRec', 'ovProf', 'ovConfirmDel', 'ovPermDel'].some(i => !$(i).classList.contains('hidden'));
-
-  document.addEventListener('touchstart', e => {
-    if (blocked() || e.touches.length !== 1) { pulling = false; return; }
-    startY = e.touches[0].clientY; pulling = true; pull = 0;
-  }, { passive: true });
-
-  document.addEventListener('touchmove', e => {
-    if (!pulling) return;
-    const dy = e.touches[0].clientY - startY;
-    if (dy <= 0 || window.scrollY > 0) { pull = 0; ptr().style.opacity = 0; return; }
-    pull = Math.min(dy * 0.5, MAXP);
-    const el = ptr();
-    el.style.transition = 'none';
-    el.style.opacity = Math.min(pull / TH, 1);
-    el.style.transform = `translate(-50%,${pull - 30}px) rotate(${pull * 4}deg)`;
-    if (e.cancelable) e.preventDefault();
-  }, { passive: false });
-
-  document.addEventListener('touchend', async () => {
-    if (!pulling) return;
-    pulling = false;
-    const el = ptr();
-    el.style.transition = '.25s';
-    if (pull >= TH) {
-      loading = true;
-      el.style.opacity = 1;
-      el.style.transform = 'translate(-50%,22px)';
-      el.classList.add('spin');
-      try { await reloadData(); } catch (e) {}
-      el.classList.remove('spin');
-      loading = false;
-    }
-    el.style.opacity = 0;
-    el.style.transform = 'translate(-50%,-60px)';
-    pull = 0;
-  });
-
-  // ஆப்புக்குள் திரும்பி வரும்போது தானாகப் புதுப்பிக்கும்
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden && S && $('ovRec').classList.contains('hidden') && $('ovProf').classList.contains('hidden')) {
-      reloadData().catch(() => {});
-    }
-  });
-})();
 </script>
 </body>
 </html>
