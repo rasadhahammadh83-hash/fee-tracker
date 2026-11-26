@@ -161,9 +161,9 @@ button,input,select{font:inherit;color:inherit}
 }
 .nr-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding-bottom:12px;border-bottom:1px solid #e2e8f0}
 .nr-crest{
-  width:46px;height:46px;border-radius:50%;border:2px solid #1e293b;
+  width:50px;height:50px;border-radius:50%;border:2.2px solid #0f172a;
   display:flex;align-items:center;justify-content:center;font-weight:800;
-  font-size:.7rem;text-align:center;line-height:1.1;background:#f8fafc;flex-shrink:0
+  font-size:.7rem;text-align:center;line-height:1.1;background:#ffffff;color:#0f172a;flex-shrink:0
 }
 .nr-org-right{text-align:right;flex:1;min-width:0}
 .nr-inst{font-size:.86rem;font-weight:800;letter-spacing:.5px;color:#0f172a}
@@ -177,8 +177,12 @@ button,input,select{font:inherit;color:inherit}
 .nr-lbl{font-size:.63rem;font-weight:800;letter-spacing:.6px;color:#64748b;text-transform:uppercase}
 .nr-val{font-size:.8rem;font-weight:700;color:#0f172a;margin-top:2px;word-break:break-word}
 .nr-paid-pill{
-  display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:#15803d;
+  display:inline-flex;align-items:center;gap:5px;background:#dcfce7;color:#15803d;
   border:1px solid #86efac;border-radius:999px;padding:2px 8px;font-size:.7rem;font-weight:800;margin-top:3px
+}
+.nr-circle-tick{
+  width:15px;height:15px;border-radius:50%;background:#16a34a;color:#ffffff;
+  display:inline-flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:900;line-height:1;flex-shrink:0
 }
 
 .nr-sec-title{
@@ -198,7 +202,7 @@ button,input,select{font:inherit;color:inherit}
 .nr-inv-code{font-weight:800;color:#0f172a;font-size:.74rem}
 .nr-inv-month{color:#475569;font-size:.71rem;margin-top:1px}
 .nr-amt-cell{font-weight:700;color:#0f172a;text-align:right}
-.nr-arr-cell{font-weight:700;color:#15803d;text-align:right;font-size:.72rem}
+.nr-arr-cell{font-weight:700;color:#15803d;text-align:right;font-size:.72rem;display:inline-flex;align-items:center;justify-content:flex-end;gap:4px}
 
 .nr-total-row{display:flex;justify-content:flex-end;margin-top:10px}
 .nr-total-box{
@@ -208,13 +212,14 @@ button,input,select{font:inherit;color:inherit}
 .nr-total-lbl{font-size:.68rem;font-weight:800;color:#334155;letter-spacing:.4px}
 .nr-total-val{font-size:.88rem;font-weight:800;color:#0f172a}
 
-.nr-seal-wrap{display:flex;justify-content:flex-end;margin-top:10px}
+.nr-seal-wrap{display:flex;justify-content:flex-end;margin-top:12px}
 .nr-seal{
   border:1.5px dashed #64748b;border-radius:6px;padding:6px 10px;
-  text-align:center;color:#475569;font-size:.62rem;font-weight:700;line-height:1.25;min-width:86px
+  text-align:center;color:#334155;font-size:.62rem;font-weight:800;line-height:1.25;
+  min-width:86px;transform:rotate(-8deg);background:#ffffff
 }
 .nr-footer{
-  margin-top:12px;padding-top:10px;border-top:1px solid #e2e8f0;
+  margin-top:14px;padding-top:10px;border-top:1px solid #e2e8f0;
   text-align:center;color:#64748b;font-size:.68rem
 }
 .nr-footer .nr-note{font-style:italic;margin-bottom:3px}
@@ -350,8 +355,8 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
     <div id="vCard" class="hidden">
       <div id="cardBox"></div>
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn" style="flex:1" onclick="downloadCardImg()">Download Image</button>
-        <button class="btn ghost" style="flex:1" onclick="shareCardImg()">Share</button>
+        <button class="btn" style="flex:1" onclick="downloadCardImg()">Download PNG</button>
+        <button class="btn ghost" style="flex:1" onclick="shareCardImg()">Share PNG</button>
       </div>
     </div>
 
@@ -556,7 +561,6 @@ function removeFromBinLocal(id) {
   saveBinIds(getBinIds().filter(x => x !== String(id)));
 }
 
-/* RELIABLE BACK TRAP SO DASHBOARD BACK STOPS AT LOGIN SCREEN */
 function pushTrapEntry() {
   try {
     history.pushState({ ftPortalTrap: true, seq: Date.now() + Math.random() }, '');
@@ -608,7 +612,6 @@ function lockToLogin(stayOnLogin = false) {
   }
 }
 
-/* REALTIME & APP RESUME REFRESH FOR WEB APK */
 function setupRealtimeAndResume() {
   if (!realtimeChannel) {
     try {
@@ -1006,7 +1009,7 @@ function renderReceiptsList(yrRecs) {
           </div>
           <div>
             <div class="nr-lbl">STATUS</div>
-            <div class="nr-paid-pill">✓ PAID</div>
+            <div class="nr-paid-pill"><span class="nr-circle-tick">✓</span><span>PAID</span></div>
           </div>
           <div>
             <div class="nr-lbl">PAYMENT METHOD</div>
@@ -1031,7 +1034,7 @@ function renderReceiptsList(yrRecs) {
               <div class="nr-inv-month">${esc(mText)}</div>
             </div>
             <div class="nr-amt-cell">${esc(amtFmt)}</div>
-            <div class="nr-arr-cell">✓ Rs. 0.00</div>
+            <div class="nr-arr-cell"><span class="nr-circle-tick" style="width:13px;height:13px;font-size:.55rem">✓</span><span>Rs. 0.00</span></div>
           </div>
         </div>
 
@@ -1043,7 +1046,7 @@ function renderReceiptsList(yrRecs) {
         </div>
 
         <div class="nr-seal-wrap">
-          <div class="nr-seal">OFFICIAL<br>SEAL</div>
+          <div class="nr-seal">⬓<br>OFFICIAL<br>SEAL</div>
         </div>
 
         <div class="nr-footer">
@@ -1052,8 +1055,8 @@ function renderReceiptsList(yrRecs) {
         </div>
 
         <div class="rbtn">
-          <button type="button" class="btn" onclick="downloadReceiptImg('${r.id}')">Download Image</button>
-          <button type="button" class="btn ghost" onclick="shareReceiptImg('${r.id}')">Share</button>
+          <button type="button" class="btn" onclick="downloadReceiptImg('${r.id}')">Download PNG</button>
+          <button type="button" class="btn ghost" onclick="shareReceiptImg('${r.id}')">Share PNG</button>
           <button type="button" class="btn ghost" onclick="openReceiptModal('${r.id}')">Edit</button>
           <button type="button" class="btn soft" onclick="doneReceipt()">Done</button>
         </div>
@@ -1062,7 +1065,6 @@ function renderReceiptsList(yrRecs) {
   }).join('');
 }
 
-/* SOFT DELETE & BIN FUNCTIONS */
 function askSoftDelete(id) {
   openDotsId = null;
   pendingDeleteId = id;
@@ -1172,12 +1174,61 @@ const SANS = '"Plus Jakarta Sans", system-ui, sans-serif';
 function rrect(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
 function dotted(g, x1, x2, y, w) { g.save(); g.setLineDash([3, 6]); g.lineWidth = w || 2; g.strokeStyle = '#222'; g.beginPath(); g.moveTo(x1, y); g.lineTo(x2, y); g.stroke(); g.restore(); }
 
-/* NEW PAYMENT RECEIPT PHOTO CANVAS RENDERER */
+function drawCircleTick(g, cx, cy, radius, bgColor, tickColor) {
+  g.save();
+  g.beginPath();
+  g.arc(cx, cy, radius, 0, Math.PI * 2);
+  g.fillStyle = bgColor;
+  g.fill();
+  g.strokeStyle = tickColor;
+  g.lineWidth = Math.max(2.2, radius * 0.24);
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+  g.beginPath();
+  g.moveTo(cx - radius * 0.45, cy + radius * 0.04);
+  g.lineTo(cx - radius * 0.12, cy + radius * 0.42);
+  g.lineTo(cx + radius * 0.48, cy - radius * 0.36);
+  g.stroke();
+  g.restore();
+}
+
+function drawCrestEmblem(g, cx, cy, r) {
+  g.save();
+  g.strokeStyle = '#0f172a';
+  g.lineWidth = 3.2;
+  g.fillStyle = '#ffffff';
+  g.beginPath();
+  g.arc(cx, cy, r, 0, Math.PI * 2);
+  g.fill();
+  g.stroke();
+
+  g.lineWidth = 1.6;
+  g.beginPath();
+  g.arc(cx, cy, r - 6, 0, Math.PI * 2);
+  g.stroke();
+
+  // Inner emblem motif + JN text
+  g.fillStyle = '#0f172a';
+  g.font = '800 18px ' + SANS;
+  g.textAlign = 'center';
+  g.fillText('JN', cx, cy - 2);
+  g.font = '700 10px ' + SANS;
+  g.fillText('SEAL', cx, cy + 14);
+  g.restore();
+}
+
+/* ULTRA-SHARP 3X PNG RECEIPT CANVAS RENDERER FOR CRYSTAL-CLEAR ZOOM */
 function buildReceiptCanvas(r) {
+  const scale = 3;
+  const baseW = 1240;
+  const baseH = 960;
   const c = document.createElement('canvas');
-  c.width = 1240;
-  c.height = 960;
+  c.width = baseW * scale;
+  c.height = baseH * scale;
   const g = c.getContext('2d');
+  g.scale(scale, scale);
+  g.imageSmoothingEnabled = true;
+  g.imageSmoothingQuality = 'high';
 
   const mText = formatMonthsLabel(r);
   const headerSub = getHeaderFeeSubtitle(r);
@@ -1186,29 +1237,16 @@ function buildReceiptCanvas(r) {
   const studentDisp = `${r.from || ''}${r.adm ? ' (' + r.adm + ')' : ''}`;
   const dateDisp = formatReceiptDateTime(r.date);
 
-  // Outer clean white sheet
   g.fillStyle = '#ffffff';
-  g.fillRect(0, 0, c.width, c.height);
+  g.fillRect(0, 0, baseW, baseH);
 
-  // Top Header Left Crest
-  g.save();
-  g.strokeStyle = '#1e293b';
-  g.lineWidth = 3;
-  g.fillStyle = '#f8fafc';
-  g.beginPath();
-  g.arc(105, 92, 42, 0, Math.PI * 2);
-  g.fill();
-  g.stroke();
-  g.fillStyle = '#1e293b';
-  g.font = '800 18px ' + SANS;
-  g.textAlign = 'center';
-  g.fillText('JN SEAL', 105, 98);
-  g.restore();
+  // Top Header Left Crest Logo
+  drawCrestEmblem(g, 114, 96, 46);
 
   // Top Header Right Organization & Fee Month
   g.textAlign = 'right';
   g.fillStyle = '#0f172a';
-  g.font = '800 28px ' + SANS;
+  g.font = '800 29px ' + SANS;
   g.fillText('JAMIAH NALEEMIAH', 1170, 74);
 
   g.fillStyle = '#475569';
@@ -1240,25 +1278,24 @@ function buildReceiptCanvas(r) {
   const rowYs = [222, 298, 374];
 
   g.textAlign = 'left';
-  // Row 1: RECEIPT NO & STUDENT DETAILS
   g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('RECEIPT NO', col1X, rowYs[0]);
   g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText(String(r.no || ''), col1X, rowYs[0] + 28);
 
   g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('STUDENT DETAILS', col2X, rowYs[0]);
   g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText(studentDisp, col2X, rowYs[0] + 28);
 
-  // Row 2: PAYMENT DATE & STATUS
   g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('PAYMENT DATE', col1X, rowYs[1]);
   g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText(dateDisp, col1X, rowYs[1] + 28);
 
+  // STATUS badge with round green checkmark icon
   g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('STATUS', col2X, rowYs[1]);
   g.fillStyle = '#dcfce7';
-  rrect(g, col2X, rowYs[1] + 8, 96, 30, 15);
+  rrect(g, col2X, rowYs[1] + 8, 118, 34, 17);
   g.fill();
-  g.strokeStyle = '#86efac'; g.lineWidth = 1.5; g.stroke();
-  g.fillStyle = '#15803d'; g.font = '800 16px ' + SANS; g.fillText('✓ PAID', col2X + 16, rowYs[1] + 29);
+  g.strokeStyle = '#86efac'; g.lineWidth = 1.8; g.stroke();
+  drawCircleTick(g, col2X + 20, rowYs[1] + 25, 10, '#16a34a', '#ffffff');
+  g.fillStyle = '#15803d'; g.font = '800 17px ' + SANS; g.fillText('PAID', col2X + 37, rowYs[1] + 31);
 
-  // Row 3: PAYMENT METHOD & ISSUED BY
   g.fillStyle = '#64748b'; g.font = '800 15px ' + SANS; g.fillText('PAYMENT METHOD', col1X, rowYs[2]);
   g.fillStyle = '#0f172a'; g.font = '700 22px ' + SANS; g.fillText('Bank Deposit', col1X, rowYs[2] + 28);
 
@@ -1270,13 +1307,11 @@ function buildReceiptCanvas(r) {
   g.font = '800 17px ' + SANS;
   g.fillText('PAYMENT BREAKDOWN', 70, 458);
 
-  // Table Container
   g.strokeStyle = '#e2e8f0';
   g.lineWidth = 2;
   rrect(g, 70, 474, 1100, 126, 10);
   g.stroke();
 
-  // Table Header
   g.fillStyle = '#f1f5f9';
   rrect(g, 71, 475, 1098, 44, 9);
   g.fill();
@@ -1289,14 +1324,12 @@ function buildReceiptCanvas(r) {
   g.fillText('AMOUNT PAID', 840, 503);
   g.fillText('ARREARS BALANCE', 1146, 503);
 
-  // Divider between table header and row
   g.strokeStyle = '#e2e8f0';
   g.beginPath();
   g.moveTo(70, 520);
   g.lineTo(1170, 520);
   g.stroke();
 
-  // Table Data Row
   g.textAlign = 'left';
   g.fillStyle = '#0f172a';
   g.font = '800 20px ' + SANS;
@@ -1310,11 +1343,12 @@ function buildReceiptCanvas(r) {
   g.font = '700 21px ' + SANS;
   g.fillText(amtFmt, 840, 560);
 
+  drawCircleTick(g, 1022, 554, 9, '#16a34a', '#ffffff');
   g.fillStyle = '#15803d';
   g.font = '700 20px ' + SANS;
-  g.fillText('✓ Rs. 0.00', 1146, 560);
+  g.fillText('Rs. 0.00', 1146, 561);
 
-  // TOTAL RECEIVED Box (Right aligned)
+  // TOTAL RECEIVED Box
   g.fillStyle = '#f8fafc';
   g.strokeStyle = '#94a3b8';
   g.lineWidth = 2;
@@ -1332,22 +1366,27 @@ function buildReceiptCanvas(r) {
   g.font = '800 24px ' + SANS;
   g.fillText(amtFmt, 1148, 659);
 
-  // OFFICIAL SEAL Box (Dashed, right aligned)
+  // Tilted OFFICIAL SEAL box with stamp motif on bottom right
   g.save();
+  g.translate(1078, 742);
+  g.rotate(-0.14);
   g.setLineDash([6, 6]);
   g.strokeStyle = '#64748b';
   g.lineWidth = 2;
-  rrect(g, 990, 704, 180, 74, 8);
+  rrect(g, -90, -38, 180, 76, 8);
   g.stroke();
+  g.setLineDash([]);
+  g.fillStyle = '#475569';
+  g.fillRect(-16, -28, 32, 6);
+  g.fillRect(-6, -22, 12, 8);
+  g.fillRect(-20, -14, 40, 4);
+  g.font = '800 15px ' + SANS;
+  g.textAlign = 'center';
+  g.fillText('OFFICIAL', 0, 10);
+  g.fillText('SEAL', 0, 28);
   g.restore();
 
-  g.textAlign = 'center';
-  g.fillStyle = '#475569';
-  g.font = '700 17px ' + SANS;
-  g.fillText('OFFICIAL', 1080, 735);
-  g.fillText('SEAL', 1080, 758);
-
-  // Footer Divider & Text
+  // Footer
   g.strokeStyle = '#e2e8f0';
   g.lineWidth = 2;
   g.beginPath();
@@ -1367,9 +1406,11 @@ function buildReceiptCanvas(r) {
 }
 
 function buildCardCanvas() {
+  const scale = 2.5;
   const yrRecs = getYearRecords(), calYr = getCalYearForCard(yrRecs), map = {};
   yrRecs.forEach(r => { if (r.isAdmissionFee || r.isExtra) return; (r.months || []).forEach(m => { if (/^\d{4}-\d{2}$/.test(m)) map[Number(m.slice(5, 7)) - 1] = { no: r.no, date: r.date }; }); });
-  const c = document.createElement('canvas'); c.width = 1100; c.height = 1480; const g = c.getContext('2d');
+  const c = document.createElement('canvas'); c.width = 1100 * scale; c.height = 1480 * scale; const g = c.getContext('2d');
+  g.scale(scale, scale);
   g.fillStyle = '#f8e3b8'; g.fillRect(0, 0, 1100, 1480); g.strokeStyle = '#111'; g.lineWidth = 4; g.strokeRect(20, 20, 1060, 1440); g.lineWidth = 2; g.strokeRect(34, 34, 1032, 1412);
   g.fillStyle = '#111'; g.textAlign = 'right'; g.font = 'bold 44px ' + SER; g.fillText(calYr, 1020, 108);
   g.textAlign = 'center'; g.font = 'bold 78px ' + SER; g.fillText('JAMIAH NALEEMIAH', 550, 225); g.font = 'bold 60px ' + SER; g.fillText('Hostel Fee Card', 550, 315);
@@ -1386,14 +1427,41 @@ function buildCardCanvas() {
   return c;
 }
 
-function triggerDownload(canvas, filename) { const a = document.createElement('a'); a.href = canvas.toDataURL('image/jpeg', 0.94); a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
-async function triggerShare(canvas, filename, titleText) {
-  canvas.toBlob(async blob => { const file = new File([blob], filename, { type: 'image/jpeg' }); if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: titleText }); return; } catch (e) {} } triggerDownload(canvas, filename); }, 'image/jpeg', 0.94);
+function triggerDownloadPng(canvas, filename) {
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
 }
-function downloadReceiptImg(id) { const r = S.allRecords.find(x => String(x.id) === String(id)); if (r) triggerDownload(buildReceiptCanvas(r), `Receipt_${String(r.no || '').replace(/\s+/g,'_')}.jpg`); }
-function shareReceiptImg(id) { const r = S.allRecords.find(x => String(x.id) === String(id)); if (r) triggerShare(buildReceiptCanvas(r), `Receipt_${String(r.no || '').replace(/\s+/g,'_')}.jpg`, `Payment Receipt #${r.no}`); }
-function downloadCardImg() { triggerDownload(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.jpg`); }
-function shareCardImg() { triggerShare(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.jpg`, `Hostel Fee Card - ${currentYear}`); }
+async function triggerSharePng(canvas, filename, titleText) {
+  canvas.toBlob(async blob => {
+    const file = new File([blob], filename, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: titleText });
+        return;
+      } catch (e) {}
+    }
+    triggerDownloadPng(canvas, filename);
+  }, 'image/png');
+}
+
+function downloadReceiptImg(id) {
+  const r = S.allRecords.find(x => String(x.id) === String(id));
+  if (r) triggerDownloadPng(buildReceiptCanvas(r), `Receipt_${String(r.no || '').replace(/\s+/g,'_')}.png`);
+}
+function shareReceiptImg(id) {
+  const r = S.allRecords.find(x => String(x.id) === String(id));
+  if (r) triggerSharePng(buildReceiptCanvas(r), `Receipt_${String(r.no || '').replace(/\s+/g,'_')}.png`, `Payment Receipt #${r.no}`);
+}
+function downloadCardImg() {
+  triggerDownloadPng(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.png`);
+}
+function shareCardImg() {
+  triggerSharePng(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.png`, `Hostel Fee Card - ${currentYear}`);
+}
 
 function openReceiptModal(id, typeOverride) {
   $('fErr').textContent = '';
