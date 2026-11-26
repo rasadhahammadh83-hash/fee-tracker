@@ -6,7 +6,6 @@
 <title>Fee Tracker - Jamiah Naleemiah</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
 :root{
   --bg:#f2f6f5;--card:#ffffff;--ink:#132625;--muted:#5b706e;
@@ -135,19 +134,12 @@ html.no-scroll,body.no-scroll{overflow:hidden!important}
 .dots-btn:active{background:#eef4f3;color:var(--ink)}
 .dots-menu{
   position:absolute;right:8px;top:calc(100% + 4px);background:#fff;border:1.5px solid var(--line);
-  border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.16);z-index:20;padding:6px;min-width:175px;
-  display:flex;flex-direction:column;gap:5px
+  border-radius:12px;box-shadow:0 10px 26px rgba(0,0,0,.16);z-index:20;padding:5px;min-width:155px
 }
-.dots-pdf-btn{
-  width:100%;background:var(--brand-light);color:var(--brand);border:0;border-radius:8px;
-  padding:9px 12px;font-weight:700;font-size:.84rem;text-align:left;cursor:pointer;
-  display:flex;align-items:center;gap:7px
-}
-.dots-pdf-btn:active{background:#cde5ea}
 .dots-del-btn{
   width:100%;background:#fff1ef;color:var(--miss);border:0;border-radius:8px;
   padding:9px 12px;font-weight:700;font-size:.84rem;text-align:left;cursor:pointer;
-  display:flex;align-items:center;gap:7px
+  display:flex;align-items:center;gap:6px
 }
 .dots-del-btn:active{background:#ffe0dc}
 
@@ -160,7 +152,7 @@ html.no-scroll,body.no-scroll{overflow:hidden!important}
 .rr{display:flex;align-items:flex-end;gap:5px;margin-top:10px;font-size:.88rem}
 .rr span:first-child,.rr span:nth-child(3),.rr span:last-child{white-space:nowrap}
 .rr .v{flex:1;min-width:0;border-bottom:1px dotted #222;font-style:italic;font-size:.9rem;padding:0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.rbtn{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:13px;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+.rbtn{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:13px;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
 .rbtn .btn{padding:8px 4px;font-size:.76rem;border-radius:9px}
 
 /* NEW RECEIPT FORMAT (new records only) */
@@ -196,6 +188,9 @@ html.no-scroll,body.no-scroll{overflow:hidden!important}
 .nr-seal{flex-shrink:0;width:54px;height:54px;border:1.5px dashed #000;border-radius:7px;transform:rotate(-3deg);display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:.46rem;font-weight:700;line-height:1.15;text-align:center;color:#000;gap:1px}
 .nr-dash{border-top:1.5px dashed #dde5f0;margin:8px 0 6px}
 .nr-addr{text-align:center;font-size:.5rem;font-weight:600;color:#272d37;line-height:1.4}
+.orig-link-box{margin-top:8px;background:#f4f9fb;border:1px solid #c9dfe5;border-radius:10px;padding:9px 11px;font-family:'Outfit','Plus Jakarta Sans',system-ui,sans-serif;word-break:break-all}
+.orig-link-lbl{font-size:.66rem;font-weight:700;color:#0b3b72;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.orig-link-a{font-size:.76rem;font-weight:600;color:#197b62;text-decoration:underline}
 
 .card{background:#f8e3b8;border:3px double #111;padding:14px 11px 16px;font-family:'Times New Roman',Georgia,serif;color:#111;margin-top:6px;box-shadow:0 10px 26px rgba(0,0,0,.14);border-radius:4px}
 .card .t1{text-align:center;font-size:1.38rem;font-weight:700;letter-spacing:.4px}
@@ -319,7 +314,6 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
       <div id="cardBox"></div>
       <div style="display:flex;gap:8px;margin-top:12px">
         <button class="btn" style="flex:1" onclick="downloadCardImg()">Download Image</button>
-        <button class="btn soft" style="flex:1" onclick="downloadCardPdf()">Download PDF</button>
         <button class="btn ghost" style="flex:1" onclick="shareCardImg()">Share</button>
       </div>
     </div>
@@ -380,6 +374,10 @@ label{display:block;font-weight:700;font-size:.84rem;margin:10px 0 4px;color:var
       </div>
       <label for="fArrears">Arrears Balance (Rs.)</label>
       <input id="fArrears" class="f" type="number" inputmode="decimal" min="0" step="any" placeholder="0">
+      <label for="fOrigUrl">Original ERP Receipt Link</label>
+      <input id="fOrigUrl" class="f" type="url" placeholder="https://erp.naleemiah.edu.lk/invoice/receipt_view.php?receipt_no=MF+-+00984">
+      <label for="fErpMsg">Paste ERP SMS / Message (Auto-fill)</label>
+      <textarea id="fErpMsg" class="f" rows="3" style="resize:vertical;font-size:.82rem" placeholder="Paste message e.g. Payment of Rs. 15,500.00 received... Receipt No: MF - 00984..." oninput="parseErpMessage()"></textarea>
     </div>
 
     <!-- 1. MONTHLY PAYMENT SECTION -->
@@ -710,6 +708,7 @@ async function fetchAllFromSupabase() {
       pm: meta.pm || 'Bank Deposit',
       inv: meta.inv || '',
       ar: Number(meta.ar) || 0,
+      origUrl: meta.origUrl || buildDefaultReceiptUrl(r.receipt_no),
       isDeleted: binIds.includes(String(r.id))
     };
   });
@@ -925,8 +924,16 @@ function receiptV2HTML(r, mText) {
   </div>`;
 }
 
+function originalLinkBoxHTML(r) {
+  const link = getReceiptOriginalUrl(r);
+  return `<div class="orig-link-box" onclick="event.stopPropagation()">
+    <div class="orig-link-lbl">Original Receipt Link</div>
+    <a class="orig-link-a" href="${esc(link)}" target="_blank" rel="noopener noreferrer">${esc(link)}</a>
+  </div>`;
+}
+
 function receiptButtons(r) {
-  return `<div class="rbtn" style="margin-top:14px"><button type="button" class="btn" onclick="downloadReceiptImg('${r.id}')">Download Image</button><button type="button" class="btn ghost" onclick="shareReceiptImg('${r.id}')">Share</button><button type="button" class="btn ghost" onclick="openReceiptModal('${r.id}')">Edit</button><button type="button" class="btn soft" onclick="doneReceipt()">Done</button></div>`;
+  return `<div class="rbtn" style="grid-template-columns:repeat(5,1fr);margin-top:14px"><button type="button" class="btn" onclick="downloadReceiptImg('${r.id}')">JPG</button><button type="button" class="btn" style="background:var(--accent)" onclick="downloadReceiptPng('${r.id}')">PNG</button><button type="button" class="btn ghost" onclick="shareReceiptImg('${r.id}')">Share</button><button type="button" class="btn ghost" onclick="openReceiptModal('${r.id}')">Edit</button><button type="button" class="btn soft" onclick="doneReceipt()">Done</button></div>` + originalLinkBoxHTML(r);
 }
 
 function renderReceiptsList(yrRecs) {
@@ -954,7 +961,7 @@ function renderReceiptsList(yrRecs) {
           <button type="button" class="dots-btn" onclick="toggleDotsMenu('${r.id}', event)" aria-label="Record options">⋮</button>
         </div>
         ${isMenuOpen ? `<div class="dots-menu" onclick="event.stopPropagation()">
-          <button type="button" class="dots-pdf-btn" onclick="downloadReceiptPdf('${r.id}')">📄 Download PDF</button>
+          <button type="button" class="dots-del-btn" style="background:#eef6f8;color:var(--brand);margin-bottom:4px" onclick="downloadReceiptPdf('${r.id}')">📄 Download PDF</button>
           <button type="button" class="dots-del-btn" onclick="askSoftDelete('${r.id}')">🗑 Delete Record</button>
         </div>` : ''}
         ${showViewBtn ? `<div style="margin-top:6px;text-align:right"><button type="button" class="btn sm" onclick="viewFullReceipt('${r.id}', event)">View Receipt</button></div>` : ''}
@@ -1058,6 +1065,141 @@ function renderFeeCard(yrRecs) {
   let cells = '';
   for (let i = 0; i < 12; i++) { const x = map[i]; cells += `<div class="cell"><b>${M3[i]}</b>${x ? `<div class="no">${esc(x.no)}</div><div class="dt">${fd(x.date)}</div>` : ''}</div>`; }
   $('cardBox').innerHTML = `<div class="card"><div class="t1">JAMIAH NALEEMIAH</div><div class="t2">Hostel Fee Card</div><div class="ln">Name: <span>${esc(S.profile.name) || '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'}</span></div><div class="ln">Adm. No. <span>${esc(S.profile.adm) || '&nbsp;&nbsp;&nbsp;&nbsp;'}</span> &nbsp;&nbsp; Class: <span>${esc(currentYear)}</span></div><div class="grid">${cells}</div><div class="dean">Dean - Social Sciences &amp; IT</div></div>`;
+}
+
+
+function buildDefaultReceiptUrl(recNo) {
+  const clean = String(recNo || '').trim();
+  if (!clean) return 'https://erp.naleemiah.edu.lk/invoice/receipt_view.php';
+  const encoded = encodeURIComponent(clean).replace(/%20/g, '+');
+  return 'https://erp.naleemiah.edu.lk/invoice/receipt_view.php?receipt_no=' + encoded;
+}
+
+function getReceiptOriginalUrl(r) {
+  return (r && r.origUrl && String(r.origUrl).trim()) ? String(r.origUrl).trim() : buildDefaultReceiptUrl(r && r.no);
+}
+
+function parseErpMessage() {
+  const txt = ($('fErpMsg') && $('fErpMsg').value) || '';
+  if (!txt.trim()) return;
+  const amtMatch = txt.match(/(?:Rs\.?|LKR)\s*([0-9,]+(?:\.[0-9]{1,2})?)/i);
+  if (amtMatch) {
+    const rawAmt = Math.round(Number(amtMatch[1].replace(/,/g, '')));
+    if (rawAmt > 0) {
+      setAmtValue(rawAmt, formPaymentType !== 'monthly');
+      updateWordsPreview();
+    }
+  }
+  const noMatch = txt.match(/Receipt\s*No\s*[:\-]?\s*([^\n.]+)/i);
+  if (noMatch) {
+    const rNo = noMatch[1].trim();
+    $('fNo').value = rNo;
+    $('fOrigUrl').value = buildDefaultReceiptUrl(rNo);
+  }
+  const urlMatch = txt.match(/(https?:\/\/[^\s]+)/i);
+  if (urlMatch) {
+    $('fOrigUrl').value = urlMatch[1].trim();
+  }
+}
+
+function triggerPngDownload(canvas, filename) {
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+async function downloadReceiptPng(id) {
+  const r = S.allRecords.find(x => String(x.id) === String(id));
+  if (!r) return;
+  const canvas = await getReceiptCanvas(r);
+  triggerPngDownload(canvas, `Receipt_${String(r.no).replace(/[^\w-]+/g,'_')}.png`);
+}
+
+function escapePdfText(str) {
+  return String(str == null ? '' : str)
+    .replace(/[^\x20-\x7E]/g, ' ')
+    .replace(/\\/g, '\\\\')
+    .replace(/\(/g, '\\(')
+    .replace(/\)/g, '\\)');
+}
+
+function buildReceiptPdfBlob(r) {
+  const mText = formatMonthsLabel(r);
+  const origUrl = getReceiptOriginalUrl(r);
+  const lines = [
+    'JAMIAH NALEEMIAH - PAYMENT RECEIPT',
+    '------------------------------------------------------------',
+    'Receipt No      : ' + (r.no || '-'),
+    'Payment Date    : ' + (fd(r.date) || '-'),
+    'Student Name    : ' + (r.from || '-'),
+    'Admission No    : ' + (r.adm || '-'),
+    'Class / Year    : ' + (r.cls || r.acadYear || '-'),
+    'Description     : ' + (mText || '-'),
+    'Amount Paid     : Rs. ' + fmt2(r.amount),
+    'Amount in Words : ' + (r.words || wordsJS(r.amount)),
+    'Payment Method  : ' + (r.pm || 'Bank Deposit'),
+    'Invoice No      : ' + (r.inv || '-'),
+    'Arrears Balance : Rs. ' + fmt2(r.ar || 0),
+    'Status          : PAID',
+    '------------------------------------------------------------',
+    'Original ERP Receipt Link:',
+    origUrl,
+    '------------------------------------------------------------',
+    'P.O. Box 01, Beruwala, Sri Lanka. | naleemiah.edu.lk'
+  ];
+
+  let streamCmds = 'BT\n/F1 12 Tf\n50 760 Td\n18 TL\n';
+  lines.forEach((line, idx) => {
+    const safe = escapePdfText(line);
+    if (idx === 0) {
+      streamCmds += `/F2 15 Tf\n(${safe}) Tj\n/F1 11 Tf\n`;
+    } else {
+      streamCmds += `T* (${safe}) Tj\n`;
+    }
+  });
+  streamCmds += 'ET\n';
+
+  const objects = [];
+  objects.push('1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n');
+  objects.push('2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n');
+  objects.push('3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R /F2 5 0 R >> >> /Contents 6 0 R >>\nendobj\n');
+  objects.push('4 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n');
+  objects.push('5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>\nendobj\n');
+  objects.push(`6 0 obj\n<< /Length ${streamCmds.length} >>\nstream\n${streamCmds}endstream\nendobj\n`);
+
+  let pdf = '%PDF-1.4\n';
+  const offsets = [0];
+  for (const obj of objects) {
+    offsets.push(pdf.length);
+    pdf += obj;
+  }
+  const xrefPos = pdf.length;
+  pdf += `xref\n0 ${objects.length + 1}\n`;
+  pdf += '0000000000 65535 f \n';
+  for (let i = 1; i <= objects.length; i++) {
+    pdf += String(offsets[i]).padStart(10, '0') + ' 00000 n \n';
+  }
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefPos}\n%%EOF`;
+  return new Blob([pdf], { type: 'application/pdf' });
+}
+
+function downloadReceiptPdf(id) {
+  openDotsId = null;
+  const r = S.allRecords.find(x => String(x.id) === String(id));
+  if (!r) return;
+  const blob = buildReceiptPdfBlob(r);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Receipt_${String(r.no).replace(/[^\w-]+/g,'_')}.pdf`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+  renderReceiptsList(getYearRecords());
 }
 
 function wordsJS(n) {
@@ -1222,53 +1364,12 @@ function buildCardCanvas() {
 }
 
 function triggerDownload(canvas, filename) { const a = document.createElement('a'); a.href = canvas.toDataURL('image/jpeg', 0.94); a.download = filename; document.body.appendChild(a); a.click(); a.remove(); }
-function triggerPdfDownload(canvas, filename) {
-  if (!window.jspdf || !window.jspdf.jsPDF) {
-    alert('PDF library still loading. Please check your internet connection and try again.');
-    return;
-  }
-  const { jsPDF } = window.jspdf;
-  const isLandscape = canvas.width > canvas.height;
-  const pdf = new jsPDF({
-    orientation: isLandscape ? 'landscape' : 'portrait',
-    unit: 'pt',
-    format: 'a4'
-  });
-  const pageW = pdf.internal.pageSize.getWidth();
-  const pageH = pdf.internal.pageSize.getHeight();
-  const margin = 24;
-  const maxW = pageW - margin * 2;
-  const maxH = pageH - margin * 2;
-  const ratio = Math.min(maxW / canvas.width, maxH / canvas.height);
-  const imgW = canvas.width * ratio;
-  const imgH = canvas.height * ratio;
-  const x = (pageW - imgW) / 2;
-  const y = (pageH - imgH) / 2;
-  const imgData = canvas.toDataURL('image/jpeg', 0.95);
-  pdf.addImage(imgData, 'JPEG', x, y, imgW, imgH, undefined, 'FAST');
-  pdf.save(filename);
-}
 async function triggerShare(canvas, filename, titleText) {
   canvas.toBlob(async blob => { const file = new File([blob], filename, { type: 'image/jpeg' }); if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], title: titleText }); return; } catch (e) {} } triggerDownload(canvas, filename); }, 'image/jpeg', 0.94);
 }
 async function downloadReceiptImg(id) { const r = S.allRecords.find(x => String(x.id) === String(id)); if (r) triggerDownload(await getReceiptCanvas(r), `Receipt_${String(r.no).replace(/[^\w-]+/g,'_')}.jpg`); }
-async function downloadReceiptPdf(id) {
-  openDotsId = null;
-  renderReceiptsList(getYearRecords());
-  const r = S.allRecords.find(x => String(x.id) === String(id));
-  if (!r) return;
-  busy(true);
-  try {
-    const canvas = await getReceiptCanvas(r);
-    triggerPdfDownload(canvas, `Receipt_${String(r.no).replace(/[^\w-]+/g,'_')}.pdf`);
-  } catch (e) {
-    alert(e.message || 'PDF download failed');
-  }
-  busy(false);
-}
 async function shareReceiptImg(id) { const r = S.allRecords.find(x => String(x.id) === String(id)); if (r) triggerShare(await getReceiptCanvas(r), `Receipt_${String(r.no).replace(/[^\w-]+/g,'_')}.jpg`, `Boarding Fee Receipt #${r.no}`); }
 function downloadCardImg() { triggerDownload(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.jpg`); }
-function downloadCardPdf() { triggerPdfDownload(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.pdf`); }
 function shareCardImg() { triggerShare(buildCardCanvas(), `Hostel_Fee_Card_${currentYear.replace(/\s+/g,'_')}.jpg`, `Hostel Fee Card - ${currentYear}`); }
 
 function openReceiptModal(id, typeOverride) {
@@ -1293,6 +1394,8 @@ function openReceiptModal(id, typeOverride) {
     $('fInv').value = r.inv || '';
     $('fPM').value = r.pm || 'Bank Deposit';
     $('fArrears').value = r.ar || 0;
+    $('fOrigUrl').value = getReceiptOriginalUrl(r);
+    if ($('fErpMsg')) $('fErpMsg').value = '';
     selectedMonths = (r.months || []).filter(m => m !== 'ADMISSION').slice();
     setAmtValue(r.amount, formPaymentType !== 'monthly');
   } else {
@@ -1311,6 +1414,8 @@ function openReceiptModal(id, typeOverride) {
     $('fInv').value = '';
     $('fPM').value = 'Bank Deposit';
     $('fArrears').value = 0;
+    $('fOrigUrl').value = buildDefaultReceiptUrl('');
+    if ($('fErpMsg')) $('fErpMsg').value = '';
     selectedMonths = [];
     setAmtValue(p.amount || '8000', formPaymentType !== 'monthly');
   }
@@ -1391,8 +1496,10 @@ async function saveReceipt() {
   if (!(amt > 0)) return E('Enter a valid amount');
 
   const words = wordsJS(amt);
+  const recNoTrim = $('fNo').value.trim();
+  const origUrlVal = ($('fOrigUrl') && $('fOrigUrl').value.trim()) ? $('fOrigUrl').value.trim() : buildDefaultReceiptUrl(recNoTrim);
   const wordsField = formIsV2
-    ? 'V2|' + JSON.stringify({ w: words, pm: $('fPM').value, inv: $('fInv').value.trim(), ar: Number($('fArrears').value) || 0 })
+    ? 'V2|' + JSON.stringify({ w: words, pm: $('fPM').value, inv: $('fInv').value.trim(), ar: Number($('fArrears').value) || 0, origUrl: origUrlVal })
     : words;
 
   const payload = {
